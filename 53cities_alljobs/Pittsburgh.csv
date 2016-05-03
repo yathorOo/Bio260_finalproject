@@ -1,0 +1,13 @@
+Term,DAnalyst,DScientist,DArchitect,City,State
+SQL,45.9459459459,0,100,Pittsburgh,PA
+SAS,16.2162162162,0,0,Pittsburgh,PA
+NoSQL,13.5135135135,0,0,Pittsburgh,PA
+Excel,13.5135135135,0,0,Pittsburgh,PA
+Hadoop,13.5135135135,0,0,Pittsburgh,PA
+Java,2.7027027027,0,0,Pittsburgh,PA
+Python,2.7027027027,100,0,Pittsburgh,PA
+SPSS,2.7027027027,0,0,Pittsburgh,PA
+Tableau,2.7027027027,0,0,Pittsburgh,PA
+Spark,2.7027027027,0,0,Pittsburgh,PA
+R,0,100,0,Pittsburgh,PA
+Matlab,0,100,0,Pittsburgh,PA

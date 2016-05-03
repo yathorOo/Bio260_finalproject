@@ -1,0 +1,16 @@
+Term,DAnalyst,DScientist,DArchitect,DEngineer,City,State
+SQL,39.4736842105,0,0,0,Gilbert,AZ
+Excel,34.2105263158,0,0,0,Gilbert,AZ
+Tableau,10.5263157895,20,0,0,Gilbert,AZ
+R,10.5263157895,40,0,0,Gilbert,AZ
+SAS,10.5263157895,40,0,0,Gilbert,AZ
+Java,7.89473684211,40,50,100,Gilbert,AZ
+JavaScript,7.89473684211,0,0,0,Gilbert,AZ
+SPSS,2.63157894737,20,0,0,Gilbert,AZ
+Python,0,40,0,0,Gilbert,AZ
+Hadoop,0,40,50,100,Gilbert,AZ
+Perl,0,20,0,0,Gilbert,AZ
+Spark,0,20,0,100,Gilbert,AZ
+HBase,0,20,0,100,Gilbert,AZ
+Flume,0,0,0,100,Gilbert,AZ
+Cassandra,0,0,0,100,Gilbert,AZ

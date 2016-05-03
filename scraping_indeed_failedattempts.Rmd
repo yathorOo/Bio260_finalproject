@@ -6,17 +6,12 @@ output: html_document
 Navigate around a website as if you're in a browser with html_session(), jump_to(), follow_link(), back(), forward(), submit_form()
 
 
-```{r}
-
-
-
+```{r, eval=FALSE}
 a <- html_session("http://www.indeed.com/jobs?q=data+scientist&l=Boston%2C+MA&start=990")%>% follow_link("Next") #How do I write a while loop that will stop when it's the last page of indeed. There'll be an error message generated for the last page. 
-
-
 ```
 
 
-```{r}
+```{r, eval=FALSE}
 library(readr)
 library(knitr)
 library(dplyr)
@@ -65,7 +60,7 @@ for (city in US_cities$City) {
 ```
 
 
-```{r}
+```{r, eval=FALSE}
 # Get job titles
 job_title <- indeed %>% 
   html_nodes("[itemprop=title]") %>%
@@ -101,7 +96,7 @@ indeed_jobs <- data.frame(job_title,company,location,description,link)
 
 
 URL list 
-```{r}
+```{r, eval=FALSE}
 #http://www.indeed.com/jobs?q=data+scientist&l=NewYork,+NY&start=0
 #http://www.indeed.com/jobs?q=data+scientist&l=NewYork,+NY&start=10
 
@@ -156,7 +151,7 @@ read_page_reviews <- function(url) {
 ggplot2_reviews <- bind_rows(lapply(urls, read_page_reviews))
 ```
 
-```{r}
+```{r, eval=FALSE}
 
 url_base <- "http://www.indeed.com/jobs?q=%22data+scientist%22&l="
 US_cities <- US_cities %>% mutate(City= gsub(", ", "%2C+", City)) %>% mutate(City = gsub(" ", "+", City))

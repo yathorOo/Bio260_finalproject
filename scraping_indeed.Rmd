@@ -1,0 +1,182 @@
+---
+title: "Scraping_indeed"
+output: html_document
+---
+
+Navigate around a website as if you're in a browser with html_session(), jump_to(), follow_link(), back(), forward(), submit_form()
+
+
+```{r}
+
+
+
+a <- html_session("http://www.indeed.com/jobs?q=data+scientist&l=Boston%2C+MA&start=990")%>% follow_link("Next") #How do I write a while loop that will stop when it's the last page of indeed. There'll be an error message generated for the last page. 
+
+
+```
+
+
+```{r}
+library(readr)
+library(knitr)
+library(dplyr)
+library(stringr)
+library(rvest)
+library(tidyr)
+
+#Dataset of cities
+US_cities <- read_csv("test.csv") 
+names(US_cities) <- "City"
+US_cities <- US_cities %>% mutate(City = gsub(";",",", City))
+US_cities2 <- US_cities %>% mutate(City=gsub(";", ",", City))
+
+#Submitting the form on indeed.com for job description & location
+
+job <- "\"Data scientist\""
+session <- html_session("http://www.indeed.com/")
+form <- html_form(session)[[1]]
+filled_form <- set_values(form, q=job, l=US_cities$City[1]) #New York 
+indeed <- submit_form(session, filled_form)
+
+# Get number of postings
+num_posting <- indeed %>%
+  html_nodes("#searchCount") %>% 
+  html_text()
+num_posting <- gsub("Jobs 1 to 10 of ", "", num_posting) %>% strtoi()
+
+
+
+get_num_posting <- function(city) {
+  }
+  
+  
+for (city in US_cities$City) {
+    job <- "\"Data scientist\""
+    session <- html_session("http://www.indeed.com/")
+    form <- html_form(session)[[1]]
+    filled_form <- set_values(form, q=job, l=city)
+    indeed <- submit_form(session, filled_form) 
+    
+    num_posting <- indeed %>%
+    html_nodes("#searchCount") %>% 
+    html_text()
+    }
+
+```
+
+
+```{r}
+# Get job titles
+job_title <- indeed %>% 
+  html_nodes("[itemprop=title]") %>%
+  html_text()
+
+# Get companies
+company <- indeed %>%
+  html_nodes("[itemprop=hiringOrganization]") %>%
+  html_text()
+
+# Get locations
+location <- indeed %>%
+  html_nodes("[itemprop=addressLocality]") %>%
+  html_text()
+
+# Get descriptions
+description <- indeed %>%
+  html_nodes("[itemprop=description]") %>%
+  html_text()
+
+# Get links
+link <- indeed %>%
+  html_nodes("[itemprop=title]") %>%
+  html_attr("href") %>% 
+  paste("https://www.indeed.com", ., sep="") %>% 
+  data.frame()
+names(link) <- "link"
+link <- mutate(link, link=as.character(link), link)
+
+indeed_jobs <- data.frame(job_title,company,location,description,link) 
+
+```
+
+
+URL list 
+```{r}
+#http://www.indeed.com/jobs?q=data+scientist&l=NewYork,+NY&start=0
+#http://www.indeed.com/jobs?q=data+scientist&l=NewYork,+NY&start=10
+
+#Dataset of cities
+US_cities <- read_csv("US_cities.csv") 
+names(US_cities) <- "City"
+US_cities <- US_cities %>% mutate(City = gsub("; ", ",+", City)) %>% mutate(City=gsub(" ", "", City))
+
+#Base_url
+url_1 <- "http://www.indeed.com/jobs?q=Data+scientist&l="
+url_2 <- "&start="
+urls <- paste0(url_1, US_cities$City, url_2) 
+names(urls) <- "url"
+
+n <- seq(0, 990, 10)
+urls <- rep(urls, each=100)
+n <- rep(n, 100)  
+urls <- paste0(urls, n) %>% data.frame() 
+names(urls) <- "url"
+urls <- urls %>% mutate(url=as.character(url))
+
+session <- html_session("http://www.indeed.com/") #Want to apply each url to the html_session!
+
+
+```
+
+
+Multiple pages: 
+```{r}
+url_base <- "http://www.amazon.com/ggplot2-Elegant-Graphics-Data-Analysis/product-reviews/0387981403/ref=undefined_2?ie=UTF8&showViewpoints=1&sortBy=helpful&pageNumber="
+urls1 <- paste0(url_base, 1:5)
+
+read_page_reviews <- function(url) {
+  h <- read_html(url)
+  title <- h %>%
+    html_nodes(".a-color-base") %>%
+    html_text()
+  
+  format <- h %>%
+    html_nodes(".a-size-mini.a-color-secondary") %>%
+    html_text()
+  
+  stars <- h %>%
+    html_nodes("#cm_cr-review_list .review-rating") %>%
+    html_text() %>%
+    str_extract("\\d") %>%
+    as.numeric()
+
+  data_frame(title, format, stars)
+}
+
+ggplot2_reviews <- bind_rows(lapply(urls, read_page_reviews))
+```
+
+```{r}
+
+url_base <- "http://www.indeed.com/jobs?q=%22data+scientist%22&l="
+US_cities <- US_cities %>% mutate(City= gsub(", ", "%2C+", City)) %>% mutate(City = gsub(" ", "+", City))
+urls <- paste0(url_base, US_cities$City)
+
+get_num_posting <- function(url) {
+  h <- read_html(url)
+  num_posting <- h %>%
+  html_nodes("#searchCount") %>% 
+  html_text()
+  num_posting <- gsub("Jobs 1 to 10 of ", "", num_posting) %>% strtoi()
+  data_frame(url, num_posting)
+}
+
+
+
+num <- seq(1, 9, 1)
+
+for (n in num) {
+  num_posting <- get_num_posting(urls$url[n])
+}
+```
+

@@ -1,0 +1,12 @@
+Term,NumPostings
+Java,100.0
+Hadoop,100.0
+Spark,100.0
+HBase,100.0
+Cassandra,100.0
+Flume,50.0
+Shark,50.0
+Excel,50.0
+Hive,50.0
+Pig,50.0
+MapReduce,50.0

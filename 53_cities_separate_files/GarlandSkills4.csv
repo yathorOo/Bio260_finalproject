@@ -1,0 +1,17 @@
+Term,NumPostings
+Hadoop,50.0
+SQL,50.0
+Spark,40.0
+Java,30.0
+Excel,30.0
+MapReduce,30.0
+Hive,30.0
+Tableau,30.0
+Python,20.0
+JavaScript,20.0
+Pig,20.0
+HBase,20.0
+Shark,10.0
+Mahout,10.0
+R,10.0
+Cassandra,10.0

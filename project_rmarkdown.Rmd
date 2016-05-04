@@ -1,0 +1,1911 @@
+---
+title: "Analysis of online ads for Data Science jobs"
+output: html_document
+Author: "Yathor Oo"
+---
+#Analysis of online ads for Data Science jobs
+
+##Background and Motivation 
+As someone who is thinking about going into the field of Data Science and Machine Learning, I have looked through online job ads for data scientists and got overwhelmed by the amount of skills required. It would take a very long time to learn the whole repertoire of data science tools. 
+
+To help decide which tools to learn first, I decided to look at which data science skills are currently most in-demand by employers in major cities in Canada and U.S.
+
+Just like any sane person would do these days, I googled "web scraping indeed" to see if I can scrape its job ads to analyse them. I came across [this awesome blog](https://jessesw.com/Data-Science-Skills/) by Jesse Steinweg-Woods published in March 2015. He looked at the data science tools mentioned in the job ads from indeed for Seattle, Chicago, San Francisco, New York and Nationwide.  
+
+His findings from nationwide search suggested that Python is much more in demand than R. This really intrigued me to see if the trends he found a year ago are still the same. 
+
+##Goals
+My initial goals were to 
+1. To examine the Data Science skills that most employers are looking for in Canada and U.S. 
+2. To examine the ranking of Canadian and American cities based on opportunities for Data Scientists
+
+However, as I searched for job ads for data scientists in Canada, I came to realize that there weren't enough ads for most of the cities. So I decided to focus on the national trend for Canada.
+
+As for U.S., I initially wanted to look at the top 100 largest cities. During the data collection process, some of the cities didn't have enough or no ads either. So I decided to focus on the following 53 cities, that had enough job ads for data scientists, instead.    
+
+* Anaheim, CA
+* Arlington, TX
+* Atlanta, GA
+* Aurora, CO
+* Austin, TX
+* Baltimore, MD
+* Boston, MA
+* Boulder, CO
+* Chandler, AZ
+* Charlotte, NC
+* Chicago, IL
+* Cincinnati, OH
+* Columbus, OH
+* Dallas, TX
+* Denver, CO
+* Detroit, MI
+* Durham, NC
+* Fort Worth, TX
+* Fremont, CA
+* Garland, TX
+* Gilbert,  AZ
+* Glendale, AZ
+* Hialeah, FL
+* Houston, TX
+* Irvine, CA
+* Irving, TX
+* Jersey City , NJ
+* Long Beach, CA
+* Los Angeles, CA
+* Mesa, AZ
+* Miami, FL
+* Minneapolis, MN
+* Nashville, TN
+* New York, NY
+* Newark, NJ
+* Oakland, CA
+* Philadelphia, PA
+* Phoenix, AZ
+* Pittsburgh, PA
+* Plano, TX
+* Portland, OR
+* Raleigh, NC
+* San Diego, CA
+* San Francisco, CA
+* San Jose, CA
+* Santa Ana, CA
+* Scottsdale, AZ
+* Seattle, WA
+* St. Louis, MO
+* St. Paul, MN
+* St. Petersburg, FL
+* Tampa, FL
+* Washington, DC
+
+While gathering data from Data-Scientists job ads, I started to wonder if the skills, that the employers are looking for, would be different for other data-driven jobs, specifically for Data Analysts, Data Architects and Data Engineers. So, I decided to also start collecting data for those as well.   
+
+##Data collection
+
+###Source of data
+I used [indeed.com](http://www.indeed.com/) and [indeed.ca](http://www.indeed.ca/) to gather job ads. 
+
+###Web scraping
+I wanted to use `rvest` to scrape data from indeed. However, after spending a few days of trying, I couldn't get the scraping function to work, since indeed is a job search aggregator and the links it provides go to different company websites that have different structure. This is my first time scraping so I probably didn't know enough R tools to make it work. 
+
+
+So, I decided to see if I could modify [Jesse's ipython code](http://nbviewer.jupyter.org/github/jmsteinw/Notebooks/blob/master/IndeedJobs.ipynb) to get .csv files of the wordcounts of the names of the Data Science Tools from the job ads. His code was written to produce plots of the results right after scraping, not produce .csv files. 
+
+You can find the ipython notebooks [here](https://github.com/yathorOo/YathorOo_Bio260_finalproject/tree/master/scraping_indeed). 
+
+You may see in the ipython notebooks that the code was a bit repetitive. I was trying to stick to d.r.y (don't repeat yourself) principle but I have never programmed in Python, so this will be a work in progress for me to make the code neater. In the meantime, this code was enough to collect the data.   
+
+Data was collected for job ads that had exactly  "Data Analyst", "Data Scientist", "Data Architect" or "Data Engineer" in its text. Since the search was done for each job title for each of the 53 cities mentioned above, I ended up with 212 (53 times 4) .csv files. I had to do quite a bit of wrangling to comebine them together. 
+
+Out of the 53 cities, 14 of them did not have enough (more than 10) or no job postings for data engineers. Therefore, I used 39 cities to compare the skills among "Data Anlysts", "Data Scientists", "Data Architects" and "Data Engineers". I also used data from 53 cities to compare the skills among "Data Anlysts", "Data Scientists" and "Data Architects". 
+
+The data collected include the percentage of job ads that contain the names of the analysis tools or programming languages, specified below, and the number of job postings per each job title in each city. 
+
+* R
+* Python
+* Java
+* C++
+* Ruby
+* Perl
+* Matlab
+* Javascript
+* Scala
+* Excel
+* Tableau
+* D3.js
+* SAS
+* SPSS
+* D3
+* Hadoop
+* MapReduce
+* Spark
+* Pig
+* Hive
+* Shark
+* Oozie
+* Zookeeper
+* Flume 
+* Mahout
+* SQL
+* NoSQL
+* HBase
+* Cassandra
+* MongoDB
+
+##Data Wrangling
+I had separate .csv files of word count percentages (Data Science Tools) for DAnalysts, DScientists, DArchitects and DEngineer per city. I'm combining them to analyse the data.
+
+```{r}
+library(readr)
+library(tidyr)
+library(dplyr)
+```
+
+Joining datasets: 
+
+```{r, eval=FALSE}
+#NewYork
+NewYork1 <- read_csv("NewYorkSkills1.csv") #.csv for Data Analysts' job ad data
+NewYork2 <- read_csv("NewYorkSkills2.csv") #.csv for Data Scientists' job ad data
+NewYork3 <- read_csv("NewYorkSkills3.csv") #.csv for Data Architects' job ad data
+NewYork4 <- read_csv("NewYorkSkills4.csv") #.csv for Data Engineers' job ad data
+
+names(NewYork1) <- c("Term", "DAnalyst")
+names(NewYork2) <- c("Term", "DScientist")
+names(NewYork3) <- c("Term", "DArchitect")
+names(NewYork4) <- c("Term", "DEngineer")
+
+j1 <- full_join(NewYork1, NewYork2, by="Term") 
+j2 <- full_join(NewYork3, NewYork4, by="Term")
+NewYork <- full_join(j1, j2, by="Term")
+
+NewYork$City <- "New York"
+NewYork$State <- "NY"
+NewYork <- replace_na(NewYork, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+#Since NAs mean the term didn't appear in the job postings and thus assigned zero.
+
+write_csv( NewYork, path = "NewYork.csv") 
+
+#Anaheim
+Anaheim1 <- read_csv("AnaheimSkills1.csv")
+Anaheim2 <- read_csv("AnaheimSkills2.csv")
+Anaheim3 <- read_csv("AnaheimSkills3.csv")
+Anaheim4 <- read_csv("AnaheimSkills4.csv")
+
+names(Anaheim1) <- c("Term", "DAnalyst")
+names(Anaheim2) <- c("Term", "DScientist")
+names(Anaheim3) <- c("Term", "DArchitect")
+names(Anaheim4) <- c("Term", "DEngineer")
+
+j1 <- full_join(Anaheim1, Anaheim2, by="Term") 
+j2 <- full_join(Anaheim3, Anaheim4, by="Term")
+Anaheim <- full_join(j1, j2, by="Term")
+
+Anaheim$City <- "Anaheim"
+Anaheim$State <- "CA"
+
+Anaheim <- replace_na(Anaheim, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv( Anaheim, path = "Anaheim.csv") 
+
+#Arlington
+Arlington1 <- read_csv("ArlingtonSkills1.csv")
+Arlington2 <- read_csv("ArlingtonSkills2.csv")
+Arlington3 <- read_csv("ArlingtonSkills3.csv")
+Arlington4 <- read_csv("ArlingtonSkills4.csv")
+
+names(Arlington1) <- c("Term", "DAnalyst")
+names(Arlington2) <- c("Term", "DScientist")
+names(Arlington3) <- c("Term", "DArchitect")
+names(Arlington4) <- c("Term", "DEngineer")
+
+j1 <- full_join(Arlington1, Arlington2, by="Term") 
+j2 <- full_join(Arlington3, Arlington4, by="Term")
+Arlington <- full_join(j1, j2, by="Term")
+
+Arlington$City <- "Arlington"
+Arlington$State <- "TX"
+
+Arlington <- replace_na(Arlington, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv( Arlington, path = "Arlington.csv") 
+
+#Atlanta
+Atlanta1 <- read_csv("AtlantaSkills1.csv")
+Atlanta2 <- read_csv("AtlantaSkills2.csv")
+Atlanta3 <- read_csv("AtlantaSkills3.csv")
+Atlanta4 <- read_csv("AtlantaSkills4.csv")
+
+names(Atlanta1) <- c("Term", "DAnalyst")
+names(Atlanta2) <- c("Term", "DScientist")
+names(Atlanta3) <- c("Term", "DArchitect")
+names(Atlanta4) <- c("Term", "DEngineer")
+
+j1 <- full_join(Atlanta1, Atlanta2, by="Term") 
+j2 <- full_join(Atlanta3, Atlanta4, by="Term")
+Atlanta <- full_join(j1, j2, by="Term")
+
+Atlanta$City <- "Atlanta"
+Atlanta$State <- "GA"
+
+Atlanta <- replace_na(Atlanta, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv( Atlanta, path = "Atlanta.csv") 
+
+
+#Aurora
+Aurora1 <- read_csv("AuroraSkills1.csv")
+Aurora2 <- read_csv("AuroraSkills2.csv")
+Aurora3 <- read_csv("AuroraSkills3.csv")
+Aurora4 <- read_csv("AuroraSkills4.csv")
+
+names(Aurora1) <- c("Term", "DAnalyst")
+names(Aurora2) <- c("Term", "DScientist")
+names(Aurora3) <- c("Term", "DArchitect")
+names(Aurora4) <- c("Term", "DEngineer")
+
+j1 <- full_join(Aurora1, Aurora2, by="Term") 
+j2 <- full_join(Aurora3, Aurora4, by="Term")
+Aurora <- full_join(j1, j2, by="Term")
+
+Aurora$City <- "Aurora"
+Aurora$State <- "CO"
+
+Aurora <- replace_na(Aurora, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv( Aurora, path = "Aurora.csv") 
+
+#Austin
+Austin1 <- read_csv("AustinSkills1.csv")
+Austin2 <- read_csv("AustinSkills2.csv")
+Austin3 <- read_csv("AustinSkills3.csv")
+Austin4 <- read_csv("AustinSkills4.csv")
+
+names(Austin1) <- c("Term", "DAnalyst")
+names(Austin2) <- c("Term", "DScientist")
+names(Austin3) <- c("Term", "DArchitect")
+names(Austin4) <- c("Term", "DEngineer")
+
+j1 <- full_join(Austin1, Austin2, by="Term") 
+j2 <- full_join(Austin3, Austin4, by="Term")
+Austin <- full_join(j1, j2, by="Term")
+
+Austin$City <- "Austin"
+Austin$State <- "TX"
+
+Austin <- replace_na(Austin, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv( Austin, path = "Austin.csv") 
+
+#Baltimore
+Baltimore1 <- read_csv("BaltimoreSkills1.csv")
+Baltimore2 <- read_csv("BaltimoreSkills2.csv")
+Baltimore3 <- read_csv("BaltimoreSkills3.csv")
+Baltimore4 <- read_csv("BaltimoreSkills4.csv")
+
+names(Baltimore1) <- c("Term", "DAnalyst")
+names(Baltimore2) <- c("Term", "DScientist")
+names(Baltimore3) <- c("Term", "DArchitect")
+names(Baltimore4) <- c("Term", "DEngineer")
+
+j1 <- full_join(Baltimore1, Baltimore2, by="Term") 
+j2 <- full_join(Baltimore3, Baltimore4, by="Term")
+Baltimore <- full_join(j1, j2, by="Term")
+
+Baltimore$City <- "Baltimore"
+Baltimore$State <- "MD"
+
+Baltimore <- replace_na(Baltimore, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Baltimore, path = "Baltimore.csv") 
+
+
+#Boston
+Boston1 <- read_csv("BostonSkills1.csv")
+Boston2 <- read_csv("BostonSkills2.csv")
+Boston3 <- read_csv("BostonSkills3.csv")
+Boston4 <- read_csv("BostonSkills4.csv")
+
+names(Boston1) <- c("Term", "DAnalyst")
+names(Boston2) <- c("Term", "DScientist")
+names(Boston3) <- c("Term", "DArchitect")
+names(Boston4) <- c("Term", "DEngineer")
+
+j1 <- full_join(Boston1, Boston2, by="Term") 
+j2 <- full_join(Boston3, Boston4, by="Term")
+Boston <- full_join(j1, j2, by="Term")
+
+Boston$City <- "Boston"
+Boston$State <- "MA"
+
+Boston <- replace_na(Boston, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Boston, path = "Boston.csv") 
+
+#Boulder
+Boulder1 <- read_csv("BoulderSkills1.csv")
+Boulder2 <- read_csv("BoulderSkills2.csv")
+Boulder3 <- read_csv("BoulderSkills3.csv")
+Boulder4 <- read_csv("BoulderSkills4.csv")
+
+names(Boulder1) <- c("Term", "DAnalyst")
+names(Boulder2) <- c("Term", "DScientist")
+names(Boulder3) <- c("Term", "DArchitect")
+names(Boulder4) <- c("Term", "DEngineer")
+
+j1 <- full_join(Boulder1, Boulder2, by="Term") 
+j2 <- full_join(Boulder3, Boulder4, by="Term")
+Boulder <- full_join(j1, j2, by="Term")
+
+Boulder$City <- "Boulder"
+Boulder$State <- "CO"
+
+Boulder <- replace_na(Boulder, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Boulder, path = "Boulder.csv") 
+
+#Chandler
+a <- read_csv("ChandlerSkills1.csv")
+b <- read_csv("ChandlerSkills2.csv")
+c <- read_csv("ChandlerSkills3.csv")
+d <- read_csv("ChandlerSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Chandler <- full_join(j1, j2, by="Term")
+
+Chandler$City <- "Chandler"
+Chandler$State <- "AZ"
+
+Chandler <- replace_na(Chandler, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Chandler, path = "Chandler.csv") 
+
+#Charlotte
+a <- read_csv("CharlotteSkills1.csv")
+b <- read_csv("CharlotteSkills2.csv")
+c <- read_csv("CharlotteSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Charlotte <- full_join(j1, c, by="Term")
+
+Charlotte$City <- "Charlotte"
+Charlotte$State <- "NC"
+
+Charlotte <- replace_na(Charlotte, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Charlotte, path = "Charlotte.csv") 
+
+#Chicago
+Chicago1 <- read_csv("ChicagoSkills1.csv")
+Chicago2 <- read_csv("ChicagoSkills2.csv")
+Chicago3 <- read_csv("ChicagoSkills3.csv")
+Chicago4 <- read_csv("ChicagoSkills4.csv")
+
+names(Chicago1) <- c("Term", "DAnalyst")
+names(Chicago2) <- c("Term", "DScientist")
+names(Chicago3) <- c("Term", "DArchitect")
+names(Chicago4) <- c("Term", "DEngineer")
+
+j1 <- full_join(Chicago1, Chicago2, by="Term") 
+j2 <- full_join(Chicago3, Chicago4, by="Term")
+Chicago <- full_join(j1, j2, by="Term")
+
+Chicago$City <- "Chicago"
+Chicago$State <- "IL"
+
+Chicago <- replace_na(Chicago, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Chicago, path = "Chicago.csv") 
+
+#Cincinnati
+a <- read_csv("CincinnatiSkills1.csv")
+b <- read_csv("CincinnatiSkills2.csv")
+c <- read_csv("CincinnatiSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Cincinnati <- full_join(j1, c, by="Term")
+
+Cincinnati$City <- "Cincinnati"
+Cincinnati$State <- "OH"
+
+Cincinnati <- replace_na(Cincinnati, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Cincinnati, path = "Cincinnati.csv") 
+
+#Columbus
+a <- read_csv("ColumbusSkills1.csv")
+b <- read_csv("ColumbusSkills2.csv")
+c <- read_csv("ColumbusSkills3.csv")
+d <- read_csv("ColumbusSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Columbus <- full_join(j1, j2, by="Term")
+
+Columbus$City <- "Columbus"
+Columbus$State <- "OH"
+
+Columbus <- replace_na(Columbus, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Columbus, path = "Columbus.csv") 
+
+#Dallas
+a <- read_csv("DallasSkills1.csv")
+b <- read_csv("DallasSkills2.csv")
+c <- read_csv("DallasSkills3.csv")
+d <- read_csv("DallasSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Dallas <- full_join(j1, j2, by="Term")
+
+Dallas$City <- "Dallas"
+Dallas$State <- "TX"
+
+Dallas <- replace_na(Dallas, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Dallas, path = "Dallas.csv") 
+
+#Denver
+a <- read_csv("DenverSkills1.csv")
+b <- read_csv("DenverSkills2.csv")
+c <- read_csv("DenverSkills3.csv")
+d <- read_csv("DenverSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Denver <- full_join(j1, j2, by="Term")
+
+Denver$City <- "Denver"
+Denver$State <- "CO"
+
+Denver <- replace_na(Denver, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Denver, path = "Denver.csv") 
+
+#Detroit
+a <- read_csv("DetroitSkills1.csv")
+b <- read_csv("DetroitSkills2.csv")
+c <- read_csv("DetroitSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Detroit <- full_join(j1, c, by="Term")
+
+Detroit$City <- "Detroit"
+Detroit$State <- "MI"
+
+Detroit <- replace_na(Detroit, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Detroit, path = "Detroit.csv") 
+
+#Durham
+a <- read_csv("DurhamSkills1.csv")
+b <- read_csv("DurhamSkills2.csv")
+c <- read_csv("DurhamSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Durham <- full_join(j1, c, by="Term")
+
+Durham$City <- "Durham"
+Durham$State <- "NC"
+
+Durham <- replace_na(Durham, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Durham, path = "Durham.csv") 
+
+#Fremont
+a <- read_csv("FremontSkills1.csv")
+b <- read_csv("FremontSkills2.csv")
+c <- read_csv("FremontSkills3.csv")
+d <- read_csv("FremontSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Fremont <- full_join(j1, j2, by="Term")
+
+Fremont$City <- "Fremont"
+Fremont$State <- "CA"
+
+Fremont <- replace_na(Fremont, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Fremont, path = "Fremont.csv") 
+
+#FortWorth
+a <- read_csv("FortWorthSkills1.csv")
+b <- read_csv("FortWorthSkills2.csv")
+c <- read_csv("FortWorthSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+FortWorth <- full_join(j1, c, by="Term")
+
+FortWorth$City <- "FortWorth"
+FortWorth$State <- "TX"
+
+FortWorth <- replace_na(FortWorth, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(FortWorth, path = "FortWorth.csv") 
+
+#Garland
+a <- read_csv("GarlandSkills1.csv")
+b <- read_csv("GarlandSkills2.csv")
+c <- read_csv("GarlandSkills3.csv")
+d <- read_csv("GarlandSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Garland <- full_join(j1, j2, by="Term")
+
+Garland$City <- "Garland"
+Garland$State <- "TX"
+
+Garland <- replace_na(Garland, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Garland, path = "Garland.csv") 
+
+#Gilbert
+a <- read_csv("GilbertSkills1.csv")
+b <- read_csv("GilbertSkills2.csv")
+c <- read_csv("GilbertSkills3.csv")
+d <- read_csv("GilbertSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Gilbert <- full_join(j1, j2, by="Term")
+
+Gilbert$City <- "Gilbert"
+Gilbert$State <- "AZ"
+
+Gilbert <- replace_na(Gilbert, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Gilbert, path = "Gilbert.csv") 
+
+#Glendale
+a <- read_csv("GlendaleSkills1.csv")
+b <- read_csv("GlendaleSkills2.csv")
+c <- read_csv("GlendaleSkills3.csv")
+d <- read_csv("GlendaleSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Glendale <- full_join(j1, j2, by="Term")
+
+Glendale$City <- "Glendale"
+Glendale$State <- "AZ"
+
+Glendale <- replace_na(Glendale, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Glendale, path = "Glendale.csv")
+
+#Hialeah
+a <- read_csv("HialeahSkills1.csv")
+b <- read_csv("HialeahSkills2.csv")
+c <- read_csv("HialeahSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Hialeah <- full_join(j1, c, by="Term")
+
+Hialeah$City <- "Hialeah"
+Hialeah$State <- "FL"
+
+Hialeah <- replace_na(Hialeah, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Hialeah, path = "Hialeah.csv") 
+
+#Houston
+a <- read_csv("HoustonSkills1.csv")
+b <- read_csv("HoustonSkills2.csv")
+c <- read_csv("HoustonSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Houston <- full_join(j1, c, by="Term")
+
+Houston$City <- "Houston"
+Houston$State <- "TX"
+
+Houston <- replace_na(Houston, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Houston, path = "Houston.csv") 
+
+#Irvine
+a <- read_csv("IrvineSkills1.csv")
+b <- read_csv("IrvineSkills2.csv")
+c <- read_csv("IrvineSkills3.csv")
+d <- read_csv("IrvineSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Irvine <- full_join(j1, j2, by="Term")
+
+Irvine$City <- "Irvine"
+Irvine$State <- "CA"
+
+Irvine <- replace_na(Irvine, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Irvine, path = "Irvine.csv") 
+
+#Irving
+a <- read_csv("IrvingSkills1.csv")
+b <- read_csv("IrvingSkills2.csv")
+c <- read_csv("IrvingSkills3.csv")
+d <- read_csv("IrvingSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Irving <- full_join(j1, j2, by="Term")
+
+Irving$City <- "Irving"
+Irving$State <- "TX"
+
+Irving <- replace_na(Irving, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Irving, path = "Irving.csv") 
+
+#Jersey
+a <- read_csv("JerseySkills1.csv")
+b <- read_csv("JerseySkills2.csv")
+c <- read_csv("JerseySkills3.csv")
+d <- read_csv("JerseySkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Jersey <- full_join(j1, j2, by="Term")
+
+Jersey$City <- "Jersey"
+Jersey$State <- "NJ"
+
+Jersey <- replace_na(Jersey, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Jersey, path = "Jersey.csv") 
+
+#LongBeach
+a <- read_csv("LongBeachSkills1.csv")
+b <- read_csv("LongBeachSkills2.csv")
+c <- read_csv("LongBeachSkills3.csv")
+d <- read_csv("LongBeachSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+LongBeach <- full_join(j1, j2, by="Term")
+
+LongBeach$City <- "LongBeach"
+LongBeach$State <- "CA"
+
+LongBeach <- replace_na(LongBeach, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(LongBeach, path = "LongBeach.csv") 
+
+#LosAngeles
+a <- read_csv("LosAngelesSkills1.csv")
+b <- read_csv("LosAngelesSkills2.csv")
+c <- read_csv("LosAngelesSkills3.csv")
+d <- read_csv("LosAngelesSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+LosAngeles <- full_join(j1, j2, by="Term")
+
+LosAngeles$City <- "Los Angeles"
+LosAngeles$State <- "CA"
+
+LosAngeles <- replace_na(LosAngeles, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(LosAngeles, path = "LosAngeles.csv") 
+
+#Mesa
+a <- read_csv("MesaSkills1.csv")
+b <- read_csv("MesaSkills2.csv")
+c <- read_csv("MesaSkills3.csv")
+d <- read_csv("MesaSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Mesa <- full_join(j1, j2, by="Term")
+
+Mesa$City <- "Mesa"
+Mesa$State <- "AZ"
+
+Mesa <- replace_na(Mesa, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Mesa, path = "Mesa.csv") 
+
+#Miami
+a <- read_csv("MiamiSkills1.csv")
+b <- read_csv("MiamiSkills2.csv")
+c <- read_csv("MiamiSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Miami <- full_join(j1, c, by="Term")
+
+Miami$City <- "Miami"
+Miami$State <- "FL"
+
+Miami <- replace_na(Miami, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Miami, path = "Miami.csv") 
+
+#Minneapolis
+a <- read_csv("MinneapolisSkills1.csv")
+b <- read_csv("MinneapolisSkills2.csv")
+c <- read_csv("MinneapolisSkills3.csv")
+d <- read_csv("MinneapolisSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Minneapolis <- full_join(j1, j2, by="Term")
+
+Minneapolis$City <- "Minneapolis"
+Minneapolis$State <- "MN"
+
+Minneapolis <- replace_na(Minneapolis, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Minneapolis, path = "Minneapolis.csv") 
+
+#Nashville
+a <- read_csv("NashvilleSkills1.csv")
+b <- read_csv("NashvilleSkills2.csv")
+c <- read_csv("NashvilleSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Nashville <- full_join(j1, c, by="Term")
+
+Nashville$City <- "Nashville"
+Nashville$State <- "TN"
+
+Nashville <- replace_na(Nashville, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Nashville, path = "Nashville.csv") 
+
+#Newark
+a <- read_csv("NewarkSkills1.csv")
+b <- read_csv("NewarkSkills2.csv")
+c <- read_csv("NewarkSkills3.csv")
+d <- read_csv("NewarkSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Newark <- full_join(j1, j2, by="Term")
+
+Newark$City <- "Newark"
+Newark$State <- "NJ"
+
+Newark <- replace_na(Newark, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Newark, path = "Newark.csv") 
+
+#Oakland
+a <- read_csv("OaklandSkills1.csv")
+b <- read_csv("OaklandSkills2.csv")
+c <- read_csv("OaklandSkills3.csv")
+d <- read_csv("OaklandSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Oakland <- full_join(j1, j2, by="Term")
+
+Oakland$City <- "Oakland"
+Oakland$State <- "CA"
+
+Oakland <- replace_na(Oakland, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Oakland, path = "Oakland.csv") 
+
+#Philadelphia
+a <- read_csv("PhiladelphiaSkills1.csv")
+b <- read_csv("PhiladelphiaSkills2.csv")
+c <- read_csv("PhiladelphiaSkills3.csv")
+d <- read_csv("PhiladelphiaSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Philadelphia <- full_join(j1, j2, by="Term")
+
+Philadelphia$City <- "Philadelphia"
+Philadelphia$State <- "PA"
+
+Philadelphia <- replace_na(Philadelphia, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Philadelphia, path = "Philadelphia.csv") 
+
+#Pittsburgh
+a <- read_csv("PittsburghSkills1.csv")
+b <- read_csv("PittsburghSkills2.csv")
+c <- read_csv("PittsburghSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Pittsburgh <- full_join(j1, c, by="Term")
+
+Pittsburgh$City <- "Pittsburgh"
+Pittsburgh$State <- "PA"
+
+Pittsburgh <- replace_na(Pittsburgh, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Pittsburgh, path = "Pittsburgh.csv") 
+
+#Phoenix
+a <- read_csv("PhoenixSkills1.csv")
+b <- read_csv("PhoenixSkills2.csv")
+c <- read_csv("PhoenixSkills3.csv")
+d <- read_csv("PhoenixSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Phoenix <- full_join(j1, j2, by="Term")
+
+Phoenix$City <- "Phoenix"
+Phoenix$State <- "AZ"
+
+Phoenix <- replace_na(Phoenix, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Phoenix, path = "Phoenix.csv") 
+
+#Plano
+a <- read_csv("PlanoSkills1.csv")
+b <- read_csv("PlanoSkills2.csv")
+c <- read_csv("PlanoSkills3.csv")
+d <- read_csv("PlanoSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Plano <- full_join(j1, j2, by="Term")
+
+Plano$City <- "Plano"
+Plano$State <- "TX"
+
+Plano <- replace_na(Plano, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Plano, path = "Plano.csv") 
+
+#Pittsburgh
+a <- read_csv("PittsburghSkills1.csv")
+b <- read_csv("PittsburghSkills2.csv")
+c <- read_csv("PittsburghSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Pittsburgh <- full_join(j1, c, by="Term")
+
+Pittsburgh$City <- "Pittsburgh"
+Pittsburgh$State <- "PA"
+
+Pittsburgh <- replace_na(Pittsburgh, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Pittsburgh, path = "Pittsburgh.csv") 
+
+#Portland
+a <- read_csv("PortlandSkills1.csv")
+b <- read_csv("PortlandSkills2.csv")
+c <- read_csv("PortlandSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Portland <- full_join(j1, c, by="Term")
+
+Portland$City <- "Portland"
+Portland$State <- "OR"
+
+Portland <- replace_na(Portland, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Portland, path = "Portland.csv") 
+
+#Raleigh
+a <- read_csv("RaleighSkills1.csv")
+b <- read_csv("RaleighSkills2.csv")
+c <- read_csv("RaleighSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Raleigh <- full_join(j1, c, by="Term")
+
+Raleigh$City <- "Raleigh"
+Raleigh$State <- "NC"
+
+Raleigh <- replace_na(Raleigh, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Raleigh, path = "Raleigh.csv") 
+
+#SanDiego
+a <- read_csv("SanDiegoSkills1.csv")
+b <- read_csv("SanDiegoSkills2.csv")
+c <- read_csv("SanDiegoSkills3.csv")
+d <- read_csv("SanDiegoSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+SanDiego <- full_join(j1, j2, by="Term")
+
+SanDiego$City <- "SanDiego"
+SanDiego$State <- "CA"
+
+SanDiego <- replace_na(SanDiego, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(SanDiego, path = "SanDiego.csv") 
+
+#SanFrancisco
+a <- read_csv("SanFranciscoSkills1.csv")
+b <- read_csv("SanFranciscoSkills2.csv")
+c <- read_csv("SanFranciscoSkills3.csv")
+d <- read_csv("SanFranciscoSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+SanFrancisco <- full_join(j1, j2, by="Term")
+
+SanFrancisco$City <- "San Francisco"
+SanFrancisco$State <- "CA"
+
+SanFrancisco <- replace_na(SanFrancisco, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(SanFrancisco, path = "SanFrancisco.csv") 
+
+#SanJose
+a <- read_csv("SanJoseSkills1.csv")
+b <- read_csv("SanJoseSkills2.csv")
+c <- read_csv("SanJoseSkills3.csv")
+d <- read_csv("SanJoseSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+SanJose <- full_join(j1, j2, by="Term")
+
+SanJose$City <- "San Jose"
+SanJose$State <- "CA"
+
+SanJose <- replace_na(SanJose, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(SanJose, path = "SanJose.csv") 
+
+#SantaAna
+a <- read_csv("SantaAnaSkills1.csv")
+b <- read_csv("SantaAnaSkills2.csv")
+c <- read_csv("SantaAnaSkills3.csv")
+d <- read_csv("SantaAnaSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+SantaAna <- full_join(j1, j2, by="Term")
+
+SantaAna$City <- "Santa Ana"
+SantaAna$State <- "CA"
+
+SantaAna <- replace_na(SantaAna, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(SantaAna, path = "SantaAna.csv") 
+
+#Scottsdale
+a <- read_csv("ScottsdaleSkills1.csv")
+b <- read_csv("ScottsdaleSkills2.csv")
+c <- read_csv("ScottsdaleSkills3.csv")
+d <- read_csv("ScottsdaleSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Scottsdale <- full_join(j1, j2, by="Term")
+
+Scottsdale$City <- "Scottsdale"
+Scottsdale$State <- "AZ"
+
+Scottsdale <- replace_na(Scottsdale, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Scottsdale, path = "Scottsdale.csv") 
+
+#Seattle
+a <- read_csv("SeattleSkills1.csv")
+b <- read_csv("SeattleSkills2.csv")
+c <- read_csv("SeattleSkills3.csv")
+d <- read_csv("SeattleSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Seattle <- full_join(j1, j2, by="Term")
+
+Seattle$City <- "Seattle"
+Seattle$State <- "WA"
+
+Seattle <- replace_na(Seattle, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Seattle, path = "Seattle.csv") 
+
+#St.Louis
+a <- read_csv("St.LouisSkills1.csv")
+b <- read_csv("St.LouisSkills2.csv")
+c <- read_csv("St.LouisSkills3.csv")
+d <- read_csv("St.LouisSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+St.Louis <- full_join(j1, j2, by="Term")
+
+St.Louis$City <- "St. Louis"
+St.Louis$State <- "MO"
+
+St.Louis <- replace_na(St.Louis, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(St.Louis, path = "St.Louis.csv") 
+
+#St.Paul
+a <- read_csv("St.PaulSkills1.csv")
+b <- read_csv("St.PaulSkills2.csv")
+c <- read_csv("St.PaulSkills3.csv")
+d <- read_csv("St.PaulSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+St.Paul <- full_join(j1, j2, by="Term")
+
+St.Paul$City <- "St. Paul"
+St.Paul$State <- "MN"
+
+St.Paul <- replace_na(St.Paul, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(St.Paul, path = "St.Paul.csv") 
+
+#St.Petersburg
+a <- read_csv("St.PetersburgSkills1.csv")
+b <- read_csv("St.PetersburgSkills2.csv")
+c <- read_csv("St.PetersburgSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+St.Petersburg <- full_join(j1, c, by="Term")
+
+St.Petersburg$City <- "St.Petersburg"
+St.Petersburg$State <- "FL"
+
+St.Petersburg <- replace_na(St.Petersburg, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(St.Petersburg, path = "St.Petersburg.csv") 
+
+#Tampa
+a <- read_csv("TampaSkills1.csv")
+b <- read_csv("TampaSkills2.csv")
+c <- read_csv("TampaSkills3.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+
+j1 <- full_join(a, b, by="Term") 
+Tampa <- full_join(j1, c, by="Term")
+
+Tampa$City <- "Tampa"
+Tampa$State <- "FL"
+
+Tampa<- replace_na(Tampa, list(DAnalyst=0, DScientist=0, DArchitect=0))
+
+write_csv(Tampa, path = "Tampa.csv") 
+
+#Washington
+a <- read_csv("WashingtonSkills1.csv")
+b <- read_csv("WashingtonSkills2.csv")
+c <- read_csv("WashingtonSkills3.csv")
+d <- read_csv("WashingtonSkills4.csv")
+
+names(a) <- c("Term", "DAnalyst")
+names(b) <- c("Term", "DScientist")
+names(c) <- c("Term", "DArchitect")
+names(d) <- c("Term", "DEngineer")
+
+j1 <- full_join(a, b, by="Term") 
+j2 <- full_join(c, d, by="Term")
+Washington <- full_join(j1, j2, by="Term")
+
+Washington$City <- "Washington"
+Washington$State <- "DC"
+
+Washington <- replace_na(Washington, list(DAnalyst=0, DScientist=0, DEngineer=0, DArchitect=0))
+
+write_csv(Washington, path = "Washington.csv") 
+```
+
+Combinging all cities: 
+
+```{r, eval=FALSE}
+master_39cities <- union(Anaheim, Arlington) %>% union(Atlanta) %>% union(Aurora) %>% union(Austin) %>% union(Baltimore) %>% union(Boston) %>% union(Boulder) %>% union(Chicago) %>% union(Dallas) %>% union(Denver) %>% union(Fremont) %>% union(Garland) %>% union(Irving) %>% union(Jersey) %>% union(LongBeach) %>% union(LosAngeles) %>% union(Minneapolis) %>% union(Newark) %>% union(NewYork) %>% union(Oakland) %>% union(Philadelphia) %>% union(Plano) %>% union(SanFrancisco) %>% union(SanJose) %>% union(SantaAna) %>% union(Seattle) %>% union(St.Louis) %>% union(St.Paul) %>% union(Washington) %>% union(Chandler) %>% union(Columbus) %>% union(Gilbert) %>% union(Glendale) %>% union(Irvine) %>% union(Mesa) %>% union(Phoenix) %>% union(SanDiego) %>% union(Scottsdale)
+
+write_csv(master_39cities, path="master_39cities.csv")
+
+master_53cities <- master_39cities %>% select(-DEngineer) %>% union(Charlotte) %>% union(Cincinnati) %>% union(Detroit) %>% union(Durham) %>% union(FortWorth) %>% union(Hialeah) %>% union(Houston) %>% union(Miami) %>% union(Nashville) %>% union(Pittsburgh) %>% union(Portland) %>% union(Raleigh) %>% union(St.Petersburg) %>% union(Tampa)
+
+write_csv(master_53cities, path="master_53cities.csv")
+```
+
+After the lengthy process of wrangling and combining the data, I now have three .csv files: 
+
+* `master_39cities` which include percentage of word frequency for all 4 job titles (Data Analysts, Data Scientists, Data Architects, Data Engineers) and
+* `master_53cities` which include percentage of word frequency for 3 job titles (Data Analysts, Data Scientists, Data Architects) 
+* `num_posting_US` which include the number for job postings for each job title in each of the 53 cities
+
+
+##Specific Research questions
+
+After the data collection process, I narrowed down my research questions to the following.
+
+* What is the ranking of American cities based on job ads for Data Analysts, Data Scientists, Data Architects & Data Engineers?
+* For Data Analysts, Data Scientists, Data Architects & Data Engineers, which analysis tools and programming languages are in highest demand by employers in Canada and U.S.? 
+
+##Exploratory Analysis 
+
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(ggrepel)
+library(gridExtra)
+library(stringr)
+library(wordcloud)
+library(RColorBrewer)
+library(tm)
+library(SnowballC)  
+```
+
+###Ranking of American cities based on job ads for Data Analysts, Data Scientists, Data Architects & Data Engineers
+
+Wrangling of num_posting data: 
+
+```{r}
+num_posting <- read_csv("num_posting_US.csv") #dataset that contains the number of job postings for each job title in each of the 53 cities
+
+num_posting <- num_posting %>% separate(col=`City, State`, into=c("City", "State"), sep=",") 
+
+names(num_posting) <- c("City", "State", "DAnalyst", "DScientist", "DArchitect", "DEngineer")
+num_posting <- replace_na(num_posting, list(DEngineer=0)) #Since the NAs for DEngineer are from cities that didn't have enough job postings (less than 10). For ease of analysis, I will consider them to be equal to zero. 
+
+num_posting_long <- num_posting %>% gather(job_title, num_posting, DAnalyst:DEngineer) #tidy data
+```
+
+####Plot of number of job postings for each job title in 53 cities:
+
+```{r, fig.width=16, fig.height=8}
+num_posting %>% 
+  ggplot() +
+  geom_line(aes(City, DAnalyst, group=1, color="Data Analyst")) +
+  geom_line(aes(City, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(City, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(City, DEngineer, group=1, color="Data Engineer")) +
+  ylab("Number of job postings") +
+  ggtitle("Number of job ads in 53 U.S. cities") +
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+You can see that almost all 53 cities had the most number of job ads for Data analysts followed by those for Data scientists, except for San Francisco, San Jose and Seattle. 
+
+There were similar number of job ads for data engineers and data architects, except for New York, Newark, Jersey City, San Jose, San Francisco, Seattle, Oakland and Fremont where there was a significantly higher number of job ads for data engineers than data architects.  
+
+####Plot of total number of job postings (for Data Analysts, Data Scientists, Data Architects & Data Engineers) in 53 cities: 
+
+```{r, fig.width=16, fig.height=8}
+num_posting_long %>% 
+  group_by(City) %>%
+  summarize(total_num_posting = sum(num_posting)) %>% 
+  ggplot(aes(City, total_num_posting))+
+  geom_point(color="purple") +
+  ylab("Number of job postings") +
+  ggtitle("Total number of job postings for Data Analysts, Data Scientists, Data Architects & Data Engineers") +
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        legend.text = element_text(size = 20))
+```
+
+In San Francisco, Newark, New York, Jersey City, Fremont, Oakland and Washington, there were a total of over 1000 job ads for Data Analysts, Data Scientists, Data Architects & Data Engineers combined together. Boston & Seattle had over 500 whereas San Jose had over 800. 
+
+###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in Canada
+
+Creating a master dataset for Canada:
+
+```{r}
+canada1 <- read_csv("canada1.csv")
+canada2 <- read_csv("canada2.csv")
+canada3 <- read_csv("canada3.csv")
+canada4 <- read_csv("canada4.csv")
+
+names(canada1) <- c("Term", "DAnalyst")
+names(canada2) <- c("Term", "DScientist")
+names(canada3) <- c("Term", "DArchitect")
+names(canada4) <- c("Term", "DEngineer")
+
+j1 <- full_join(canada1, canada2, by="Term") 
+j2 <- full_join(canada3, canada4, by="Term")
+canada <- full_join(j1, j2, by="Term")
+
+canada <- replace_na(canada, replace=list(DAnalyst=0, DScientist=0, DArchitect=0, DEngineer=0)) 
+
+canada_long <- canada %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidy
+```
+
+
+####Plot of data science tools vs. Job title for Canada
+
+```{r}
+canada %>% 
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst")) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) +
+  xlab("") + 
+  ylab("Percentage appearing in job ads") +
+  ggtitle("Data Science Tools in demand in Canada") +
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+For data analysts, 38.3% of job ads asked for SQL, 34.2% for Excel, 11.4% for SAS, 11.2% for R, 10.9% for Tableau and only 7.1% for Python. (US_avg)
+
+For data analysts, 43.2% of job ads asked for SQL, 41.18% for Excel, 16.1% for R, 16.1% for Tableau, 12.3% for Python and 10.5% for SAS. 
+
+```{r}
+canada %>% select(Term, DAnalyst) %>% arrange(desc(DAnalyst))
+```
+
+For data scientists, 47.8% of job ads asked for R, 44.1% for Python, 36.3% for Hadoop, 31.4 for SQL, 28.2% for Java, 26.6% for SAS and only 8.7% for Excel. (US_avg)
+
+For data scientists, 34.4% of job ads asked for R, 34.4% for Python, 30.5% for SQL, 23.4% for Java, 19.5% for Tableau, 18.8% for Hadoop and 11.7% for Excel. 
+
+```{r}
+canada %>% select(Term, DScientist) %>% arrange(desc(DScientist))
+```
+
+
+For data architects, 45.3% asked for SQL, 32.9% for Hadoop, 31.7% for Java, 21.8% for NoSQL, 11.5% for R and 10.6% for Python. (avg_US)
+
+For data architects, 32.7% asked for SQL, 13.9% for Java, 13.9% for Hadoop, 11.9% for Tableau, 11.9% for Python and only 5.9% for R. 
+
+```{r}
+canada %>% select(Term, DArchitect) %>% arrange(desc(DArchitect))
+```
+
+
+For data engineers, 58.6% asked for Hadoop, 55.8% for Java, 44.6% for Spark, 31.2% for SQL, 27.6% for Python and only 7.2% for R.
+
+For data engineers, 66.7% asked for Python, 63.0% for Hadoop, 40.7% for Spark, 37.0% for SQL & Scala, and 18.5% for Java. 
+
+```{r}
+canada %>% select(Term, DEngineer) %>% arrange(desc(DEngineer))
+```
+
+It's really interesting to see that the top 2 most-mentioned tools for data analysts are SQL & Excel whereas those for data scientists are R & Python. 
+The percentage of job ads that asked for SQL was pretty consistent across all four job titles. Same goes for Hadoop, except in job ads for Data analysts where it was asked only 4.9% of the time. 
+
+
+
+###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in USA
+
+###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in Canada
+
+Creating a master dataset for USA nationwide count:
+
+```{r, eval=FALSE}
+usa1 <- read_csv("national1.csv")
+usa2 <- read_csv("national2.csv")
+usa3 <- read_csv("national3.csv")
+usa4 <- read_csv("national4.csv")
+
+names(usa1) <- c("Term", "DAnalyst")
+names(usa2) <- c("Term", "DScientist")
+names(usa3) <- c("Term", "DArchitect")
+names(usa4) <- c("Term", "DEngineer")
+
+j1 <- full_join(usa1, usa2, by="Term") 
+j2 <- full_join(usa3, usa4, by="Term")
+usa <- full_join(j1, j2, by="Term")
+
+USA <- replace_na(usa, replace=list(DAnalyst=0, DScientist=0, DArchitect=0, DEngineer=0)) 
+
+USA_long <- usa %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidy
+```
+
+
+####Plot of data science tools vs. Job title for USA
+
+```{r, eval=FALSE}
+USA %>% 
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst")) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) +
+  xlab("") + 
+  ylab("Percentage appearing in job ads") +
+  ggtitle("Data Science Tools in demand in USA") +
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+For data analysts, 38.3% of job ads asked for SQL, 34.2% for Excel, 11.4% for SAS, 11.2% for R, 10.9% for Tableau and only 7.1% for Python. (US_avg)
+
+For data analysts, 43.2% of job ads asked for SQL, 41.18% for Excel, 16.1% for R, 16.1% for Tableau, 12.3% for Python and 10.5% for SAS. 
+
+```{r, eval=FALSE}
+USA %>% select(Term, DAnalyst) %>% arrange(desc(DAnalyst))
+```
+
+For data scientists, 47.8% of job ads asked for R, 44.1% for Python, 36.3% for Hadoop, 31.4 for SQL, 28.2% for Java, 26.6% for SAS and only 8.7% for Excel. (US_avg)
+
+For data scientists, 34.4% of job ads asked for R, 34.4% for Python, 30.5% for SQL, 23.4% for Java, 19.5% for Tableau, 18.8% for Hadoop and 11.7% for Excel. 
+
+```{r, eval=FALSE}
+USA %>% select(Term, DScientist) %>% arrange(desc(DScientist))
+```
+
+
+For data architects, 45.3% asked for SQL, 32.9% for Hadoop, 31.7% for Java, 21.8% for NoSQL, 11.5% for R and 10.6% for Python. (avg_US)
+
+For data architects, 32.7% asked for SQL, 13.9% for Java, 13.9% for Hadoop, 11.9% for Tableau, 11.9% for Python and only 5.9% for R. 
+
+```{r, eval=FALSE}
+USA %>% select(Term, DArchitect) %>% arrange(desc(DArchitect))
+```
+
+
+For data engineers, 58.6% asked for Hadoop, 55.8% for Java, 44.6% for Spark, 31.2% for SQL, 27.6% for Python and only 7.2% for R.
+
+For data engineers, 66.7% asked for Python, 63.0% for Hadoop, 40.7% for Spark, 37.0% for SQL & Scala, and 18.5% for Java. 
+
+```{r, eval=FALSE}
+USA %>% select(Term, DEngineer) %>% arrange(desc(DEngineer))
+```
+
+It's really interesting to see that the top 2 most-mentioned tools for data analysts are SQL & Excel whereas those for data scientists are R & Python. 
+The percentage of job ads that asked for SQL was pretty consistent across all four job titles. Same goes for Hadoop, except in job ads for Data analysts where it was asked only 4.9% of the time. 
+
+Loading the datasets with the individual cities' data: 
+```{r}
+master_39cities <- read_csv("master_39cities.csv")
+master_53cities <- read_csv("master_53cities.csv")
+master_39cities_long <- master_39cities %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidy
+master_53cities_long <- master_53cities %>% gather(job_title, percentage, DAnalyst: DArchitect) #tidy
+```
+
+Below, I'm calculating the average appearance of the term (name of Data Science Tools) in job postings gathered. 
+
+####Average apperance of the data science tools in job ads for Data Analysts, Data Scientists, Data Architects and Data Engineers in 39 US cities
+
+```{r, fig.width=16, fig.height=8}
+avg_appearance_39 <- master_39cities %>% 
+  group_by(Term) %>% 
+  summarize(avg_DAnalyst = mean(DAnalyst), avg_DScientist = mean(DScientist), 
+            avg_DArchitect = mean(DArchitect), avg_DEngineer = mean(DEngineer)) 
+
+avg_appearance_39 %>%
+  ggplot() +
+  geom_line(aes(Term, avg_DAnalyst, group=1, color="Data Analyst")) + 
+  geom_line(aes(Term, avg_DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, avg_DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, avg_DEngineer, group=1, color="Data Engineer")) +
+  xlab("") +
+  ylab("Average percentage of appearance in job ads") +
+  ggtitle("Data Science tools most common in job ads (39 U.S. cities)")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+For data analysts, 38.3% of job ads asked for SQL, 34.2% for Excel, 11.4% for SAS, 11.2% for R, 10.9% for Tableau and only 7.1% for Python. 
+
+```{r}
+avg_appearance_39 %>% select(Term, avg_DAnalyst) %>% arrange(desc(avg_DAnalyst))
+```
+
+
+For data scientists, 47.8% of job ads asked for R, 44.1% for Python, 36.3% for Hadoop, 31.4 for SQL, 28.2% for Java, 26.6% for SAS and only 8.7% for Excel.
+
+```{r}
+avg_appearance_39 %>% select(Term, avg_DScientist) %>% arrange(desc(avg_DScientist))
+```
+
+
+For data architects, 45.3% asked for SQL, 32.9% for Hadoop, 31.7% for Java, 21.8% for NoSQL, 11.5% for R and 10.6% for Python. 
+
+```{r}
+avg_appearance_39 %>% select(Term, avg_DArchitect) %>% arrange(desc(avg_DArchitect))
+```
+
+For data engineers, 58.6% asked for Hadoop, 55.8% for Java, 44.6% for Spark, 31.2% for SQL, 27.6% for Python and only 7.2% for R. 
+
+```{r}
+avg_appearance_39 %>% select(Term, avg_DEngineer) %>% arrange(desc(avg_DEngineer))
+```
+
+It's really interesting to see that the top 2 most-mentioned tools for data analysts are SQL & Excel whereas those for data scientists are R & Python. 
+The percentage of job ads that asked for SQL was pretty consistent across all four job titles. Same goes for Hadoop, except in job ads for Data analysts where it was asked only 4.9% of the time. 
+
+
+####Average apperance of the terms for Data Analysts, Data Scientists & Data Architects in 53 US cities
+
+```{r, fig.width=16, fig.height=8}
+#I"m also checking if the trends are any different when looked at 53 cities. Since the dataset does not have the numbers for data engineers, I'll only be looking at data analysts, data scientists & data architects.  
+avg_appearance_53 <- master_53cities %>% group_by(Term) %>% summarize(avg_DAnalyst = mean(DAnalyst), avg_DScientist = mean(DScientist), avg_DArchitect = mean(DArchitect)) 
+
+avg_appearance_53 %>% 
+  ggplot() +
+  geom_line(aes(Term, avg_DAnalyst, group=1, color="Data Analyst")) + 
+  geom_line(aes(Term, avg_DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, avg_DArchitect, group=1, color="Data Architect")) +
+  xlab("") +
+  ylab("Average percentage of appearance in job ads") +
+  ggtitle("Data Science tools most common in job ads (53 U.S. cities)")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+You can observe similar trends for the 53 cities as well. 
+
+```{r}
+avg_appearance_53 %>% select(Term, avg_DAnalyst) %>% arrange(desc(avg_DAnalyst))
+```
+
+```{r}
+avg_appearance_53 %>% select(Term, avg_DScientist) %>% arrange(desc(avg_DScientist))
+```
+
+```{r}
+avg_appearance_53 %>% select(Term, avg_DArchitect) %>% arrange(desc(avg_DArchitect))
+```
+
+####Data Science tools in demand for Data Analysts in 53 cities
+
+```{r, fig.width=16, fig.height=8, message=FALSE}
+master_53cities %>% 
+  ggplot(aes(Term, DAnalyst)) + 
+  geom_boxplot(color="red") +
+  xlab("") +
+  ylab("Percentage of appearance in job ads") +
+  ggtitle("Data Science Tools in demand for Data Analysts")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+####Data Science Tools in demand for Data Scientists in 53 cities
+
+```{r, fig.width=16, fig.height=8}
+master_53cities %>% 
+  ggplot(aes(Term, DScientist)) + 
+  geom_boxplot(color="purple") +
+  xlab("") +
+  ylab("Percentage of appearance in job ads") +
+  ggtitle("Data Science Tools in demand for Data Scientists")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+####Data Science Tools in demand for Data Architects in 53 cities
+
+```{r, fig.width=16, fig.height=8}
+master_53cities %>% 
+  ggplot(aes(Term, DArchitect)) + 
+  geom_boxplot(color="green") +
+  xlab("") +
+  ylab("Percentage of appearance in job ads") +
+  ggtitle("Data Science Tools in demand for Data Architects")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+###Data Science Tools in demand for Data Engineers in 39 cities (Less cities had job ads for data engineers)
+
+```{r, fig.width=16, fig.height=8}
+master_39cities %>% 
+  ggplot(aes(Term, DEngineer)) + 
+  geom_boxplot(color="turquoise") +
+  xlab("") +
+  ylab("Percentage of appearance in job ads") +
+  ggtitle("Data Science Tools in demand for Data Engineers")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+
+###Comparing demand of Data Science Tools in different U.S. cities 
+
+####Newark vs. Jersey City vs. New York vs. Washington
+
+```{r, message=FALSE, fig.width=16, fig.height=8}
+master_39cities%>% 
+  filter (City == "New York" | City=="Newark" | City =="Jersey" | City =="Washington") %>%
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
+  facet_wrap(~City) +
+  xlab("") +
+  ylab("Percentage of appearance in job postings") +
+  ggtitle("Percentage of job ads with a data science tool")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+###Oakland vs. Boston vs. San Francisco vs. Fremont
+
+```{r, message=FALSE, fig.width=16, fig.height=8}
+master_39cities%>% 
+  filter (City == "Boston" | City=="Oakland" | City =="San Francisco" | City =="Fremont") %>%
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
+  facet_wrap(~City) +
+  xlab("") +
+  ylab("Percentage of appearance in job postings") +
+  ggtitle("Percentage of job ads with a data science tool")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+####Los Angeles vs. Atlanta vs. Long Beach vs. Irving
+
+```{r, message=FALSE, fig.width=16, fig.height=8}
+master_39cities%>% 
+  filter (City == "Los Angeles" | City=="Atlanta" | City =="Long Beach" | City =="Irving") %>%
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
+  facet_wrap(~City) +
+  xlab("") +
+  ylab("Percentage of appearance in job postings") +
+  ggtitle("Percentage of job ads with a data science tool")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+####San Jose vs. Chicago vs. Anaheim vs. Dallas
+
+```{r, message=FALSE, fig.width=16, fig.height=8}
+master_39cities%>% 
+  filter (City == "San Jose" | City=="Chicago" | City =="Anaheim" | City =="Dallas") %>%
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
+  facet_wrap(~City) +
+  xlab("") +
+  ylab("Percentage of appearance in job postings") +
+  ggtitle("Percentage of job ads with a data science tool")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+####Garland vs. Plano vs. Arlington vs. Philadelphia
+
+```{r, message=FALSE, fig.width=16, fig.height=8}
+master_39cities%>% 
+  filter (City == "Garland" | City=="Plano" | City =="Arlington" | City =="Philadelphia") %>%
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
+  facet_wrap(~City) +
+  xlab("") +
+  ylab("Percentage of appearance in job postings") +
+  ggtitle("Percentage of job ads with a data science tool")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+####Seattle vs. Minneapolis vs. St. Paul vs. Baltimore
+
+```{r, message=FALSE, fig.width=16, fig.height=8}
+master_39cities%>% 
+  filter (City == "Seattle" | City=="Minneapolis" | City =="St. Paul" | City =="Baltimore") %>%
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
+  facet_wrap(~City) +
+  xlab("") +
+  ylab("Percentage of appearance in job postings") +
+  ggtitle("Percentage of job ads with a data science tool")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+
+####Denver vs. Santa Ana vs. St. Louis vs. Aurora
+
+```{r, message=FALSE, fig.width=16, fig.height=8}
+master_39cities%>% 
+  filter (City == "Denver" | City=="Santa Ana" | City =="St. Louis" | City =="Aurora") %>%
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
+  facet_wrap(~City) +
+  xlab("") +
+  ylab("Percentage of appearance in job postings") +
+  ggtitle("Percentage of job ads with a data science tool")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+
+####Mesa vs. Phoenix vs. Scottsdale vs. Irvine
+
+```{r, message=FALSE, fig.width=16, fig.height=8}
+master_39cities%>% 
+  filter (City == "Mesa" | City=="Phoenix" | City =="Scottsdale" | City =="Irvine") %>%
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
+  facet_wrap(~City) +
+  xlab("") +
+  ylab("Percentage of appearance in job postings") +
+  ggtitle("Percentage of job ads with a data science tool")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+####Chandler vs. Gilbert vs. Glendale vs. Boulder
+
+```{r, message=FALSE, fig.width=16, fig.height=8}
+master_39cities%>% 
+  filter (City == "Chandler" | City=="Gilbert" | City =="Glendale" | City =="Boulder") %>%
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
+  facet_wrap(~City) +
+  xlab("") +
+  ylab("Percentage of appearance in job postings") +
+  ggtitle("Percentage of job ads with a data science tool")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+####Austin vs. Columbus vs. San Diego
+
+```{r, message=FALSE, fig.width=16, fig.height=8}
+master_39cities%>% 
+  filter (City == "Austin" | City=="Columbus" | City =="San Diego") %>%
+  ggplot() +
+  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
+  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
+  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
+  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
+  facet_wrap(~City) +
+  xlab("") +
+  ylab("Percentage of appearance in job postings") +
+  ggtitle("Percentage of job ads with a data science tool")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+
+

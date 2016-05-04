@@ -1,6 +1,7 @@
 # Job Ad Scraping data
 
 This repository contains the job ad data collected from scraping indeed.com for the following 53 cities. 
+
 The job titles searched are "Data Analyst", "Data Scientist", "Data Architect" and "Data Engineer". 
 
 Anaheim, CA
@@ -61,12 +62,18 @@ Washington, DC
 **Please note** 
 
 1. Skills1 = Job ad data for Data Analysts
+
 2. Skills2 = Job ad data for Data Scientists
+
 3. Skills3 = Job ad data for Data Architects
+
 4. Skills4 = Job ad data for Data Engineers 
+
 5. Data is gathered from 53 cities for 1, 2, and 3. 
    However, only 39 cities had enough job postings for 4 (data engineers) to scrape. 
+
 6. Column `term` consists of the data science tools scraped from indeed.com
+
 7. Column `num_postings` is the percent of job ads that contain the `term`  
 
 

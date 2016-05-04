@@ -3,8 +3,6 @@ title: "Analysis of online ads for Data Science jobs"
 output: html_document
 Author: "Yathor Oo"
 ---
-#Analysis of online ads for Data Science jobs
-
 ##Background and Motivation 
 As someone who is thinking about going into the field of Data Science and Machine Learning, I have looked through online job ads for data scientists and got overwhelmed by the amount of skills required. It would take a very long time to learn the whole repertoire of data science tools. 
 
@@ -1469,7 +1467,7 @@ The percentage of job ads that asked for SQL was pretty consistent across all fo
 
 Creating a master dataset for USA nationwide count:
 
-```{r, eval=FALSE}
+```{r}
 usa1 <- read_csv("national1.csv")
 usa2 <- read_csv("national2.csv")
 usa3 <- read_csv("national3.csv")
@@ -1492,7 +1490,7 @@ USA_long <- usa %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidy
 
 ####Plot of data science tools vs. Job title for USA
 
-```{r, eval=FALSE}
+```{r}
 USA %>% 
   ggplot() +
   geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst")) +
@@ -1510,9 +1508,11 @@ USA %>%
 
 For data analysts, 38.3% of job ads asked for SQL, 34.2% for Excel, 11.4% for SAS, 11.2% for R, 10.9% for Tableau and only 7.1% for Python. (US_avg)
 
-For data analysts, 43.2% of job ads asked for SQL, 41.18% for Excel, 16.1% for R, 16.1% for Tableau, 12.3% for Python and 10.5% for SAS. 
+For data analysts, 43.2% of job ads asked for SQL, 41.18% for Excel, 16.1% for R, 16.1% for Tableau, 12.3% for Python and 10.5% for SAS. (Canada)
 
-```{r, eval=FALSE}
+For data analysts, 56.2% of job ads asked for Excel, 27.5% for SQL, 12.5% for Tableau, 12.4% for R, 10.3% for Java and 5.5% for SAS. 
+
+```{r}
 USA %>% select(Term, DAnalyst) %>% arrange(desc(DAnalyst))
 ```
 
@@ -1520,8 +1520,10 @@ For data scientists, 47.8% of job ads asked for R, 44.1% for Python, 36.3% for H
 
 For data scientists, 34.4% of job ads asked for R, 34.4% for Python, 30.5% for SQL, 23.4% for Java, 19.5% for Tableau, 18.8% for Hadoop and 11.7% for Excel. 
 
-```{r, eval=FALSE}
-USA %>% select(Term, DScientist) %>% arrange(desc(DScientist))
+For data scientists, 37.7% of job ads asked for Python, 36.6% for R, 29.4% for SQL, 27.0% for Hadoop, 24.9% for Java, 18.7% for Matlab, 12.8% for SAS and only 4.6% for Excel. 
+
+```{r}
+USA %>% select(Term, DScientist) %>% arrange(desc(DScientist)) 
 ```
 
 
@@ -1529,17 +1531,21 @@ For data architects, 45.3% asked for SQL, 32.9% for Hadoop, 31.7% for Java, 21.8
 
 For data architects, 32.7% asked for SQL, 13.9% for Java, 13.9% for Hadoop, 11.9% for Tableau, 11.9% for Python and only 5.9% for R. 
 
-```{r, eval=FALSE}
+For data architects, 45.2% asked for SQL, 18.0% for Java, 17.2% for Java, 16.1% for Tableau, 9.1% for Python, 7.9% for R. 
+
+```{r}
 USA %>% select(Term, DArchitect) %>% arrange(desc(DArchitect))
 ```
 
 
 For data engineers, 58.6% asked for Hadoop, 55.8% for Java, 44.6% for Spark, 31.2% for SQL, 27.6% for Python and only 7.2% for R.
 
-For data engineers, 66.7% asked for Python, 63.0% for Hadoop, 40.7% for Spark, 37.0% for SQL & Scala, and 18.5% for Java. 
+For data engineers, 66.7% asked for Python, 63.0% for Hadoop, 40.7% for Spark, 37.0% for SQL & Scala, and 18.5% for Java.
 
-```{r, eval=FALSE}
-USA %>% select(Term, DEngineer) %>% arrange(desc(DEngineer))
+For data engineers, 47.5% asked for SQL, 36.6% for Hadoop, 30.6% for Python, 28.7% for Java and 9.1% for R. 
+
+```{r}
+USA %>% select(Term, DEngineer) %>% arrange(desc(DEngineer)) 
 ```
 
 It's really interesting to see that the top 2 most-mentioned tools for data analysts are SQL & Excel whereas those for data scientists are R & Python. 
@@ -1905,6 +1911,289 @@ master_39cities%>%
         axis.text.x=element_text(angle=90, vjust=1), 
         plot.title = element_text(size = rel(1.1)), 
         legend.text = element_text(size = 20))
+```
+
+
+###Stackoverflow data
+
+```{r}
+load("data_scientist.rda")
+
+stackoverflow <- data_scientist %>% select(JobId, Title, Tags, LocationString, Description, CountryCode, StateCode)
+Description <- stackoverflow %>% select(Description)
+```
+
+####Creating general functions to count the terms (names of the data science tools)
+
+```{r}
+count1 <- function(term, lang) { #Counting just one variation of the term
+  lang = str_count(Description$Description, term) %>% data.frame()
+  names(lang) <- "count"
+  lang <- lang %>% mutate(count=ifelse(count == 0, 0, 1)) 
+  #Scenerio 1: If the count is 0, the term didn't appear in the job ad. 
+  #Scenerio 2: If the count is not equal to zero, the term appeared 1 or more times in the job ad. 
+  #Since we are only interested in the proportion of job ads that contain the term, we will make the count = 1 for scenerio 2. 
+  lang
+}
+
+count2 <- function(term1, term2, lang) { #Counting 2 variations of the term
+  a = str_count(Description$Description, term1) %>% data.frame()
+  names(a) <- "count"
+  b = str_count(Description$Description, term2) %>% data.frame()
+  names(b) <- "count"
+  lang <- a + b
+  lang <- lang %>% mutate(count=ifelse(count== 0, 0, 1))
+  lang
+}
+
+count3 <- function(term1, term2, term3, lang) { #Counting 3 variations of the term
+  a = str_count(Description$Description, term1) %>% data.frame()
+  names(a) <- "count"
+  b = str_count(Description$Description, term2) %>% data.frame()
+  names(b) <- "count"
+  c = str_count(Description$Description, term3) %>% data.frame()
+  names(c) <- "count"
+  lang <- a + b + c
+  lang <- lang %>% mutate(count=ifelse(count== 0, 0, 1))
+  lang
+}
+
+count7 <- function(term1, term2, term3, term4, term5, term6, term7, lang) { #Counting 7 variations of the term
+  a = str_count(Description$Description, term1) %>% data.frame()
+  names(a) <- "count"
+  b = str_count(Description$Description, term2) %>% data.frame()
+  names(b) <- "count"
+  c = str_count(Description$Description, term3) %>% data.frame()
+  names(c) <- "count"
+  d = str_count(Description$Description, term4) %>% data.frame()
+  names(d) <- "count"
+  e = str_count(Description$Description, term5) %>% data.frame()
+  names(e) <- "count"
+  f = str_count(Description$Description, term6) %>% data.frame()
+  names(f) <- "count"
+  g = str_count(Description$Description, term7) %>% data.frame()
+  names(g) <- "count"
+  lang <- a + b + c +d + e+ f + g
+  lang <- lang %>% mutate(count=ifelse(count== 0, 0, 1))
+  lang
+}
+
+count3_fixed3 <- function(term1, term2, term3, lang){ #Counting 3 fixed variations of the term
+  a <- grepl(term1, Description$Description) %>% data.frame()
+  #When I was trying to count R, `str_count` was counting all R's in words, not just the specific one separate word "R". 
+  #Therefore, I switched to grepl, that allows me to do so. 
+  names(a) <- "count"
+  a <- a %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  b <- grepl(term2, Description$Description) %>% data.frame()
+  names(b) <- "count"
+  b <- b %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  c <- grepl(term3, Description$Description) %>% data.frame()
+  names(c) <- "count"
+  c <- c %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  lang <- a+b+c
+  lang <- lang %>% mutate(count=ifelse(count == 0, 0, 1))
+  lang
+}
+
+count6_fixed6 <- function(term1, term2, term3, term4, term5, term6, lang){ #Counting 6 fixed variations of the term
+  a <- grepl(term1, Description$Description) %>% data.frame() 
+  names(a) <- "count"
+  a <- a %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  b <- grepl(term2, Description$Description) %>% data.frame()
+  names(b) <- "count"
+  b <- b %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  c <- grepl(term3, Description$Description) %>% data.frame()
+  names(c) <- "count"
+  c <- c %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  d <- grepl(term4, Description$Description) %>% data.frame()
+  names(d) <- "count"
+  d <- d %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  e <- grepl(term5, Description$Description) %>% data.frame()
+  names(e) <- "count"
+  e <- e %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  f <- grepl(term6, Description$Description) %>% data.frame()
+  names(f) <- "count"
+  f <- f %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  lang <- a+b+c+d+e+f
+  lang <- lang %>% mutate(count=ifelse(count == 0, 0, 1))
+  lang
+}
+
+count9_fixed5 <- function(term1, term2, term3, term4, #term1-5 are fixed words 
+                   term5, term6, term7, term8, term9, lang) {
+  a <- grepl(term1, Description$Description) %>% data.frame()
+  names(a) <- "count"
+  a <- a %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  b <- grepl(term2, Description$Description) %>% data.frame()
+  names(b) <- "count"
+  b <- b %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  c <- grepl(term3, Description$Description) %>% data.frame()
+  names(c) <- "count"
+  c <- c %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  d <- grepl(term4, Description$Description) %>% data.frame()
+  names(d) <- "count"
+  d <- d %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  e <- grepl(term5, Description$Description) %>% data.frame()
+  names(e) <- "count"
+  e <- e %>% mutate(count=ifelse(count==TRUE, 1, 0))
+  f = str_count(Description$Description, term6) %>% data.frame()
+  names(f) <- "count"
+  g = str_count(Description$Description, term7) %>% data.frame()
+  names(g) <- "count"
+  h = str_count(Description$Description, term8) %>% data.frame()
+  names(h) <- "count"
+  i = str_count(Description$Description, term9) %>% data.frame()
+  names(i) <- "count"
+  lang <- a + b + c +d + e+ f + g + h+ i
+  lang <- lang %>% mutate(count=ifelse(count== 0, 0, 1))
+  lang
+}
+```
+
+
+####Creating `stack_count` that contains the columns that indicate if a particular job ad had the `term` or not (yes = 1, no =0)
+
+```{r}
+R <- count3_fixed3("\\<R\\>", "\\<R.\\>", "\\<R,\\>", R) 
+Python <- count2("Python", "python", Python) 
+Java <- count2("Java", "java", Java)
+C_plus_plus <- count2("C\\+\\+", "c\\+\\+", C_plus_plus)
+Ruby <- count2("Ruby", "ruby", Ruby)
+Perl <- count2("Perl", "perl", Perl)
+Matlab <- count2("Matlab", "matlab", Matlab)
+Javascript <- count2("Javascript", "javascript", Javascript)
+Scala <- count2("Scala", "scala", Scala)
+Excel <- count2("Excel", "excel",Excel)
+Tableau <- count2("Tableau","tableau", Tableau)
+D3.js <- count2("D3.js","d3.js", D3.js)
+SAS <- count2("SAS","sas", SAS)
+SPSS <- count2("SPSS","spss", SPSS)
+D3 <- count2("d3", "D3", D3)
+Hadoop <- count2("Hadoop", "hadoop", Hadoop)
+MapReduce <- count2("MapReduce","mapreduce", MapReduce)
+Spark <- count2("Spark", "spark", Spark)
+Pig <- count2("Pig","pig", Pig)
+Hive <- count2("Hive", "hive", Hive)
+Shark <- count2("Shark", "shark", Shark)
+Oozie <- count2("Oozie", "oozie", Oozie)
+Zookeeper <- count2("Zookeeper", "zookeeper", Zookeeper)
+Flume <- count2("Flume", "flume", Flume)
+Mahout <- count2("Mahout", "mahout", Mahout)
+SQL <- count6_fixed6("\\<SQL\\>", "\\<sql\\>","\\<SQL.\\>", "\\<SQL,\\>", "\\<sql.\\>", "\\<sql,\\>", SQL)
+NoSQL <- count2("NoSQL", "nosql", NoSQL) 
+HBase <- count2("HBase", "hbase", HBase)
+Cassandra <- count2("Cassandra", "cassandra", Cassandra)
+MongoDB <- count2("MongoDB","mongodb", MongoDB)
+
+MachineLearning <- count2("Machine Learning", "machine learning", MachineLearning)
+BigData <- count3("Big Data", "big data", "Big data", BigData)
+PhD <- count3("PhD", "Ph.D", "Ph.D.", PhD)
+Bachelors <- count7("Undergraduate", "undergraduate", "BA", "BS", "BSc", "Bachelor\'s", "Bachelors", Bachelors)
+
+Masters <- count9_fixed5("\\<Ms\\>", "\\<MS\\>", "\\<M.S.\\>", "\\<MA\\>", "\\<MBA\\>", "MS degree","Master\'s", "Master", "Masters", Masters)
+
+stack_count <- cbind(R, Python, Java, C_plus_plus, Ruby, Perl, Matlab, Javascript, Scala, Excel, Tableau, D3.js, SAS, SPSS, D3, Hadoop, MapReduce, Spark, Pig, Hive, Shark, Oozie, Zookeeper, Flume, Mahout, SQL, NoSQL, HBase, Cassandra, MongoDB, MachineLearning, BigData, PhD, Bachelors, Masters)
+
+names(stack_count) <- c("R", "Python", "Java", "C_plus_plus", "Ruby", "Perl", "Matlab", "Javascript", "Scala", "Excel", "Tableau", "D3.js", "SAS", "SPSS", "D3", "Hadoop", "MapReduce", "Spark", "Pig", "Hive", "Shark", "Oozie", "Zookeeper", "Flume", "Mahout", "SQL", "NoSQL", "HBase", "Cassandra", "MongoDB", "MachineLearning", "BigData", "PhD", "Bachelors", "Masters")
+
+stack_count <- cbind(stackoverflow, stack_count)
+```
+
+
+####Creating `sum_count` with columns `term`, `count` (total number job ads containg the `term`) & freq (% of job ads containing the `term`)
+
+```{r, message=FALSE}
+sum_count <- stack_count %>% 
+  summarize(R = sum(R), Python = sum(Python), Java= sum(Java), 
+            `C++` = sum(C_plus_plus), Ruby= sum(Ruby), Perl= sum(Perl),
+            Matlab= sum(Matlab), Javascript= sum(Javascript), Scala= sum(Scala),
+            Excel= sum(Excel), Tableau= sum(Tableau), D3.js=sum(D3.js),
+            SAS=sum(SAS), SPSS=sum(SPSS), D3=sum(D3), Hadoop=sum(Hadoop),
+            MapReduce=sum(MapReduce),Spark=sum(Spark), Pig=sum(Pig), Hive=sum(Hive),
+            Shark=sum(Shark), Oozie=sum(Oozie),  Zookeeper=sum(Zookeeper),
+            Flume=sum(Flume), Mahout=sum(Mahout), SQL=sum(SQL), NoSQL=sum(NoSQL),
+            HBase=sum(HBase), Cassandra=sum(Cassandra),
+            MongoDB=sum(MongoDB),MachineLearning=sum(MachineLearning),
+            BigData=sum(BigData), PhD=sum(PhD), Bachelors=sum(Bachelors),
+            Masters=sum(Masters)) %>% 
+  tbl_df() %>% 
+  gather(term, count, R:Masters) #count = number of job ads that include the `term`
+
+sum_count <- sum_count %>% mutate(freq=count/362, count) 
+#freq = % of job ads that contain the `term`
+```
+
+####Word cloud of Data Science Tools mentioned in Stack Overflow Job Ads
+
+```{r, warning=FALSE, message=FALSE}
+pal2 <- brewer.pal(8,"Dark2")
+wordcloud(sum_count$term, sum_count$freq, scale = c(4, 1.5), random.order = FALSE, colors=pal2, rot.per = 0, fixed.asp = FALSE)
+```
+
+####Creating a word cloud of Stack Overflow Job Ad Descriptions
+
+```{r, message=FALSE, warning=FALSE}
+Description1 <- Description %>% 
+  mutate(Description= gsub("\\[|\\]", "", Description)) %>% 
+  mutate(Description= gsub("looking", "", Description)) %>% 
+  mutate(Description= gsub("looking", "", Description)) %>% 
+  mutate(Description= gsub("position", "", Description)) %>% 
+  mutate(Description= gsub("one", "", Description)) %>% 
+  mutate(Description= gsub("rel=\"nofollow\"", "", Description)) %>% 
+  mutate(Description= gsub("also", "", Description)) %>% 
+  mutate(Description= gsub("company", "", Description)) %>% 
+  mutate(Description= gsub("<li>experience", "", Description)) %>% 
+  mutate(Description= gsub("well", "", Description)) %>% 
+  mutate(Description= gsub("<li>work", "", Description)) %>% 
+  mutate(Description= gsub("<li><span>", "", Description)) %>% 
+  mutate(Description= gsub("<p>", "", Description)) %>% 
+  mutate(Description= gsub("</p>", "", Description)) %>% 
+  mutate(Description= gsub("<p><strong>", "", Description)) %>% 
+  mutate(Description= gsub("<ul>", "", Description)) %>% 
+  mutate(Description= gsub("</ul>", "", Description)) %>% 
+  mutate(Description= gsub("<li>", "", Description)) %>% 
+  mutate(Description= gsub("</li>", "", Description)) %>% 
+  mutate(Description= gsub("&amp;", "", Description)) %>% 
+  mutate(Description= gsub("&nbsp;", "", Description)) %>%
+  mutate(Description= gsub("</strong>", "", Description)) %>% 
+  mutate(Description= gsub("<strong>", "", Description)) %>%
+  mutate(Description= gsub("<span>", "", Description)) %>% 
+  mutate(Description= gsub("<br>", "", Description)) %>% 
+  mutate(Description= gsub("<em>", "", Description)) %>% 
+  mutate(Description= gsub("</span>", "", Description)) %>% 
+  mutate(Description= gsub("<a href", "", Description)) %>% 
+  mutate(Description= gsub("=\"http://www", "", Description)) %>% 
+  mutate(Description= gsub("&rsquo", "", Description)) %>%
+  mutate(Description= gsub("youll", "", Description)) %>% 
+  mutate(Description= gsub("will", "", Description)) %>% 
+  mutate(Description= gsub("within", "", Description)) %>% 
+  mutate(Description= gsub("can", "", Description)) %>% 
+  mutate(Description= gsub("using", "", Description)) %>% 
+  mutate(Description= gsub("apply", "", Description)) %>% 
+  mutate(Description= gsub("part", "", Description)) %>%
+  mutate(Description=gsub("analysing", "analyse", Description))
+  
+r_words <- c("right", "youll", "get", "next", "high", "bull","way", "etc", "didate", "based", "every", "take", "ndash", "real", "core", "key", "day", "able", "van", "time", "used", "highly", "years", "sets", "want", "seeking", "senior", "related", "join", "ability", "new", "teams", "role", "use", "like", "make", "across", "provide", "drive", "help", "work", "working", "including", "questions", "environment", "implement", "developing", "products", "responsible", "need", "closely", "recommendations", "just", "ing", "set", "andor")
+
+review_text <- paste(Description1$Description, collapse=" ")
+review_source <- VectorSource(review_text)
+corpus <- Corpus(review_source)
+corpus <- tm_map(corpus, content_transformer(tolower))
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, stripWhitespace)
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
+corpus <- tm_map(corpus, removeWords, r_words)
+
+dtm <- DocumentTermMatrix(corpus)
+dtm2 <- as.matrix(dtm)
+
+frequency <- colSums(dtm2)
+frequency <- sort(frequency, decreasing=TRUE)
+head(frequency)
+
+words <- names(frequency)
+
+wordcloud(words, frequency, scale=c(3.5,.7), min.freq=30, random.order=FALSE, colors=brewer.pal(8, "Dark2"), max.words = 250, rot.per = 0, fixed.asp = FALSE, random.color = TRUE)
 ```
 
 

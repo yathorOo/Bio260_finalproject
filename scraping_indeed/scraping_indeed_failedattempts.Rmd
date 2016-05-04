@@ -124,7 +124,7 @@ session <- html_session("http://www.indeed.com/") #Want to apply each url to the
 ```
 
 
-Multiple pages: 
+Multiple pages example from class: 
 ```{r}
 url_base <- "http://www.amazon.com/ggplot2-Elegant-Graphics-Data-Analysis/product-reviews/0387981403/ref=undefined_2?ie=UTF8&showViewpoints=1&sortBy=helpful&pageNumber="
 urls1 <- paste0(url_base, 1:5)

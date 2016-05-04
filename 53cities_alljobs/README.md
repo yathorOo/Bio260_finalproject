@@ -65,10 +65,10 @@ Washington, DC
 2. DScientist= "Data Scientists"
 3. DArchitect= "Data Architects"
 4. DEngineer= "Data Engineers"
-The columns `DAnalyst`, `DScientist`, `DArchitect` and `DEngineer` contain the percent
-of the 'term' (in this case, the names of programming languages) appearing in the total 
-job ads for the respective job title. 
+5. Column `term` consists of the data science tools scraped from indeed.com
+6. Columns `DAnalyst`, `DScientist`, `DArchitect` and `DEngineer` contain percent of job 
+   ads that contain the `term` for each job title respectively. 
 
 
-
+  
 

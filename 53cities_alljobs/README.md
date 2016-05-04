@@ -2,6 +2,7 @@
 
 This repository contains the job ad data collected from scraping indeed.com for the 
 following 53 cities. 
+
 The job titles searched are "Data Analyst", "Data Scientist", "Data Architect" and 
 "Data Engineer". 
 
@@ -62,10 +63,15 @@ Washington, DC
 
 **Please note** 
 1. DAnalyst= "Data Analysts"
+
 2. DScientist= "Data Scientists"
+
 3. DArchitect= "Data Architects"
+
 4. DEngineer= "Data Engineers"
+
 5. Column `term` consists of the data science tools scraped from indeed.com
+
 6. Columns `DAnalyst`, `DScientist`, `DArchitect` and `DEngineer` contain percent of job 
    ads that contain the `term` for each job title respectively. 
 

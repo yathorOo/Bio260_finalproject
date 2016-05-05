@@ -1345,10 +1345,11 @@ library(SnowballC)
 
 ###Ranking of American cities based on job ads for Data Analysts, Data Scientists, Data Architects & Data Engineers
 
-Wrangling of num_posting data: 
+Wrangling of `num_posting` data: 
 
 ```{r}
-num_posting <- read_csv("num_posting_US.csv") #dataset that contains the number of job postings for each job title in each of the 53 cities
+num_posting <- read_csv("num_posting_US.csv") 
+#dataset that contains the number of job postings for each job title in each of the 53 cities
 
 num_posting <- num_posting %>% separate(col=`City, State`, into=c("City", "State"), sep=",") 
 
@@ -1369,7 +1370,7 @@ num_posting %>%
   geom_line(aes(City, DEngineer, group=1, color="Data Engineer")) +
   ylab("Number of job postings") +
   ggtitle("Number of job ads in 53 U.S. cities") +
-  theme( text=element_text(size=20), 
+  theme( text=element_text(size=22), 
         axis.text.x=element_text(angle=90, vjust=1), 
         plot.title = element_text(size = rel(1.1)), 
         legend.text = element_text(size = 20))
@@ -1389,14 +1390,14 @@ num_posting_long %>%
   geom_point(color="purple") +
   ylab("Number of job postings") +
   ggtitle("Total number of job postings for Data Analysts, Data Scientists, Data Architects & Data Engineers") +
-  theme( text=element_text(size=20), 
+  theme( text=element_text(size=22), 
         axis.text.x=element_text(angle=90, vjust=1), 
         legend.text = element_text(size = 20))
 ```
 
 In San Francisco, Newark, New York, Jersey City, Fremont, Oakland and Washington, there were a total of over 1000 job ads for Data Analysts, Data Scientists, Data Architects & Data Engineers combined together. Boston & Seattle had over 500 whereas San Jose had over 800. 
 
-###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in Canada
+###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in Canada (nationwide)
 
 Creating a master dataset for Canada:
 
@@ -1423,7 +1424,7 @@ canada_long <- canada %>% gather(job_title, percentage, DAnalyst: DEngineer) #ti
 
 ####Plot of data science tools vs. Job title for Canada
 
-```{r}
+```{r, fig.width=16, fig.height=8}
 canada %>% 
   ggplot() +
   geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst")) +
@@ -1439,15 +1440,11 @@ canada %>%
         legend.text = element_text(size = 20))
 ```
 
-For data analysts, 38.3% of job ads asked for SQL, 34.2% for Excel, 11.4% for SAS, 11.2% for R, 10.9% for Tableau and only 7.1% for Python. (US_avg)
-
 For data analysts, 43.2% of job ads asked for SQL, 41.18% for Excel, 16.1% for R, 16.1% for Tableau, 12.3% for Python and 10.5% for SAS. 
 
 ```{r}
 canada %>% select(Term, DAnalyst) %>% arrange(desc(DAnalyst))
 ```
-
-For data scientists, 47.8% of job ads asked for R, 44.1% for Python, 36.3% for Hadoop, 31.4 for SQL, 28.2% for Java, 26.6% for SAS and only 8.7% for Excel. (US_avg)
 
 For data scientists, 34.4% of job ads asked for R, 34.4% for Python, 30.5% for SQL, 23.4% for Java, 19.5% for Tableau, 18.8% for Hadoop and 11.7% for Excel. 
 
@@ -1455,17 +1452,11 @@ For data scientists, 34.4% of job ads asked for R, 34.4% for Python, 30.5% for S
 canada %>% select(Term, DScientist) %>% arrange(desc(DScientist))
 ```
 
-
-For data architects, 45.3% asked for SQL, 32.9% for Hadoop, 31.7% for Java, 21.8% for NoSQL, 11.5% for R and 10.6% for Python. (avg_US)
-
 For data architects, 32.7% asked for SQL, 13.9% for Java, 13.9% for Hadoop, 11.9% for Tableau, 11.9% for Python and only 5.9% for R. 
 
 ```{r}
 canada %>% select(Term, DArchitect) %>% arrange(desc(DArchitect))
 ```
-
-
-For data engineers, 58.6% asked for Hadoop, 55.8% for Java, 44.6% for Spark, 31.2% for SQL, 27.6% for Python and only 7.2% for R.
 
 For data engineers, 66.7% asked for Python, 63.0% for Hadoop, 40.7% for Spark, 37.0% for SQL & Scala, and 18.5% for Java. 
 
@@ -1473,14 +1464,8 @@ For data engineers, 66.7% asked for Python, 63.0% for Hadoop, 40.7% for Spark, 3
 canada %>% select(Term, DEngineer) %>% arrange(desc(DEngineer))
 ```
 
-It's really interesting to see that the top 2 most-mentioned tools for data analysts are SQL & Excel whereas those for data scientists are R & Python. 
-The percentage of job ads that asked for SQL was pretty consistent across all four job titles. Same goes for Hadoop, except in job ads for Data analysts where it was asked only 4.9% of the time. 
 
-
-
-###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in USA
-
-###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in Canada
+###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in USA (nationwide)
 
 Creating a master dataset for USA nationwide count:
 
@@ -1507,7 +1492,7 @@ USA_long <- usa %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidy
 
 ####Plot of data science tools vs. Job title for USA
 
-```{r}
+```{r, fig.width=16, fig.height=8}
 USA %>% 
   ggplot() +
   geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst")) +
@@ -1523,19 +1508,11 @@ USA %>%
         legend.text = element_text(size = 20))
 ```
 
-For data analysts, 38.3% of job ads asked for SQL, 34.2% for Excel, 11.4% for SAS, 11.2% for R, 10.9% for Tableau and only 7.1% for Python. (US_avg)
-
-For data analysts, 43.2% of job ads asked for SQL, 41.18% for Excel, 16.1% for R, 16.1% for Tableau, 12.3% for Python and 10.5% for SAS. (Canada)
-
 For data analysts, 56.2% of job ads asked for Excel, 27.5% for SQL, 12.5% for Tableau, 12.4% for R, 10.3% for Java and 5.5% for SAS. 
 
 ```{r}
 USA %>% select(Term, DAnalyst) %>% arrange(desc(DAnalyst))
 ```
-
-For data scientists, 47.8% of job ads asked for R, 44.1% for Python, 36.3% for Hadoop, 31.4 for SQL, 28.2% for Java, 26.6% for SAS and only 8.7% for Excel. (US_avg)
-
-For data scientists, 34.4% of job ads asked for R, 34.4% for Python, 30.5% for SQL, 23.4% for Java, 19.5% for Tableau, 18.8% for Hadoop and 11.7% for Excel. 
 
 For data scientists, 37.7% of job ads asked for Python, 36.6% for R, 29.4% for SQL, 27.0% for Hadoop, 24.9% for Java, 18.7% for Matlab, 12.8% for SAS and only 4.6% for Excel. 
 
@@ -1543,21 +1520,11 @@ For data scientists, 37.7% of job ads asked for Python, 36.6% for R, 29.4% for S
 USA %>% select(Term, DScientist) %>% arrange(desc(DScientist)) 
 ```
 
-
-For data architects, 45.3% asked for SQL, 32.9% for Hadoop, 31.7% for Java, 21.8% for NoSQL, 11.5% for R and 10.6% for Python. (avg_US)
-
-For data architects, 32.7% asked for SQL, 13.9% for Java, 13.9% for Hadoop, 11.9% for Tableau, 11.9% for Python and only 5.9% for R. 
-
 For data architects, 45.2% asked for SQL, 18.0% for Java, 17.2% for Java, 16.1% for Tableau, 9.1% for Python, 7.9% for R. 
 
 ```{r}
 USA %>% select(Term, DArchitect) %>% arrange(desc(DArchitect))
 ```
-
-
-For data engineers, 58.6% asked for Hadoop, 55.8% for Java, 44.6% for Spark, 31.2% for SQL, 27.6% for Python and only 7.2% for R.
-
-For data engineers, 66.7% asked for Python, 63.0% for Hadoop, 40.7% for Spark, 37.0% for SQL & Scala, and 18.5% for Java.
 
 For data engineers, 47.5% asked for SQL, 36.6% for Hadoop, 30.6% for Python, 28.7% for Java and 9.1% for R. 
 
@@ -1565,13 +1532,16 @@ For data engineers, 47.5% asked for SQL, 36.6% for Hadoop, 30.6% for Python, 28.
 USA %>% select(Term, DEngineer) %>% arrange(desc(DEngineer)) 
 ```
 
-It's really interesting to see that the top 2 most-mentioned tools for data analysts are SQL & Excel whereas those for data scientists are R & Python. 
-The percentage of job ads that asked for SQL was pretty consistent across all four job titles. Same goes for Hadoop, except in job ads for Data analysts where it was asked only 4.9% of the time. 
+
+###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in 39 US cities
+
+Now, let's see if the trends are different for the U.S. cities data compared to nationwide.  
 
 Loading the datasets with the individual cities' data: 
+
 ```{r}
 master_39cities <- read_csv("master_39cities.csv")
-master_39cities_long <- master_39cities %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidy
+master_39cities_long <- master_39cities %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidydata
 ```
 
 Below, I'm calculating the average appearance of the term (name of Data Science Tools) in job postings gathered. 
@@ -1628,9 +1598,53 @@ avg_appearance_39 %>% select(Term, avg_DEngineer) %>% arrange(desc(avg_DEngineer
 It's really interesting to see that the top 2 most-mentioned tools for data analysts are SQL & Excel whereas those for data scientists are R & Python. 
 The percentage of job ads that asked for SQL was pretty consistent across all four job titles. Same goes for Hadoop, except in job ads for Data analysts where it was asked only 4.9% of the time. 
 
+####Data Science tools in demand for Data Analysts in 39 cities
+
+```{r, fig.width=16, fig.height=8, message=FALSE}
+master_39cities %>% 
+  ggplot(aes(Term, DAnalyst)) + 
+  geom_boxplot(color="red") +
+  xlab("") +
+  ylab("Percentage of appearance in job ads") +
+  ggtitle("Data Science Tools in demand for Data Analysts")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+####Data Science Tools in demand for Data Scientists in 39 cities
+
+```{r, fig.width=16, fig.height=8}
+master_39cities %>% 
+  ggplot(aes(Term, DScientist)) + 
+  geom_boxplot(color="purple") +
+  xlab("") +
+  ylab("Percentage of appearance in job ads") +
+  ggtitle("Data Science Tools in demand for Data Scientists")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
+
+####Data Science Tools in demand for Data Architects in 39 cities
+
+```{r, fig.width=16, fig.height=8}
+master_39cities %>% 
+  ggplot(aes(Term, DArchitect)) + 
+  geom_boxplot(color="green") +
+  xlab("") +
+  ylab("Percentage of appearance in job ads") +
+  ggtitle("Data Science Tools in demand for Data Architects")+
+  theme( text=element_text(size=20), 
+        axis.text.x=element_text(angle=90, vjust=1), 
+        plot.title = element_text(size = rel(1.1)), 
+        legend.text = element_text(size = 20))
+```
 
 
-###Data Science Tools in demand for Data Engineers in 39 cities (Less cities had job ads for data engineers)
+###Data Science Tools in demand for Data Engineers in 39 cities
 
 ```{r, fig.width=16, fig.height=8}
 master_39cities %>% 
@@ -2070,6 +2084,7 @@ wordcloud(sum_count$term, sum_count$freq, scale = c(4, 1.5), random.order = FALS
 ####Creating a word cloud of Stack Overflow Job Ad Descriptions
 
 ```{r, message=FALSE, warning=FALSE}
+
 Description1 <- Description %>% 
   mutate(Description= gsub("\\[|\\]", "", Description)) %>% 
   mutate(Description= gsub("looking", "", Description)) %>% 

@@ -1,6 +1,6 @@
 # Bio260_finalproject: Analysis of online ads for Data Science jobs
 
-##Background and Motivation 
+####Background and Motivation 
 As someone who is thinking about going into the field of Data Science and Machine Learning, I have looked through online job ads for data scientists and got overwhelmed by the amount of skills required. It would take a very long time to learn the whole repertoire of data science tools. 
 
 To help decide which tools to learn first, I decided to look at which data science skills are currently most in-demand by employers in major cities in Canada and U.S.
@@ -44,5 +44,10 @@ His findings from nationwide search suggested that Python is much more in demand
 * `53_cities_separate_files`: Job ad data collected from scraping indeed.com for 53 American cities. 
     + The job titles searched are "Data Analyst", "Data Scientist", "Data Architect" and "Data Engineer".
     + The files have separate data for each job title in each city. 
+* `53cities_alljobs` folder: Job ad data collected from scraping indeed.com for 53 American cities. 
+    + The job titles searched are "Data Analyst", "Data Scientist", "Data Architect" and "Data Engineer".
+* `scraping_indeed`: Code used for web scraping indeed. 
+    + These are modifed codes of Jesse Steinweg-Woods. YOou can find his original code [here](http://nbviewer.jupyter.org/github/jmsteinw/Notebooks/blob/master/IndeedJobs.ipynb) 
+    + You may see in the ipython notebooks that the code was a bit repetitive. I was trying to stick to d.r.y (don't repeat yourself) principle but I have never programmed in Python, so this will be a work in progress for me to make the code neater. In the meantime, this code was enough to collect the data. 
 
 

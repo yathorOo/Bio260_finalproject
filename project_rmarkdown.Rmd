@@ -2148,11 +2148,19 @@ sum_count <- stack_count %>%
 
 sum_count <- sum_count %>% mutate(freq=count/362, count) 
 #freq = % of job ads that contain the `term`
+sum_count %>% 
+  filter(term != "Masters" | "PhD" | "Bachelors") %>% 
+  arrange(desc(freq))
+
+sum_count %>% 
+  filter(term == "Masters" | "PhD" | "Bachelors") %>% 
+  arrange(desc(freq))
 ```
 
 ####
 ```{r, message=FALSE, fig.width=16, fig.height=8}
 sum_count %>% 
+  filter(term != "Masters" | "PhD" | "Bachelors") %>%
   ggplot(aes(term, freq)) +
   geom_point(size=2) +
   geom_line(aes(term, freq, group=1, color="maroon")) +

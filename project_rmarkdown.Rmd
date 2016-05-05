@@ -1299,7 +1299,19 @@ All the .csv files created from above can be found [here](https://github.com/yat
 Combining all cities: 
 
 ```{r, eval=FALSE}
-master_39cities <- union(Anaheim, Arlington) %>% union(Atlanta) %>% union(Aurora) %>% union(Austin) %>% union(Baltimore) %>% union(Boston) %>% union(Boulder) %>% union(Chicago) %>% union(Dallas) %>% union(Denver) %>% union(Fremont) %>% union(Garland) %>% union(Irving) %>% union(Jersey) %>% union(LongBeach) %>% union(LosAngeles) %>% union(Minneapolis) %>% union(Newark) %>% union(NewYork) %>% union(Oakland) %>% union(Philadelphia) %>% union(Plano) %>% union(SanFrancisco) %>% union(SanJose) %>% union(SantaAna) %>% union(Seattle) %>% union(St.Louis) %>% union(St.Paul) %>% union(Washington) %>% union(Chandler) %>% union(Columbus) %>% union(Gilbert) %>% union(Glendale) %>% union(Irvine) %>% union(Mesa) %>% union(Phoenix) %>% union(SanDiego) %>% union(Scottsdale)
+master_39cities <- union(Anaheim, Arlington) %>% union(Atlanta) %>% 
+  union(Aurora) %>% union(Austin) %>% union(Baltimore) %>% 
+  union(Boston) %>% union(Boulder) %>% union(Chicago) %>% 
+  union(Dallas) %>% union(Denver) %>% union(Fremont) %>% 
+  union(Garland) %>% union(Irving) %>% union(Jersey) %>% 
+  union(LongBeach) %>% union(LosAngeles) %>% union(Minneapolis) %>% 
+  union(Newark) %>% union(NewYork) %>% union(Oakland) %>% 
+  union(Philadelphia) %>% union(Plano) %>% union(SanFrancisco) %>% 
+  union(SanJose) %>% union(SantaAna) %>% union(Seattle) %>% 
+  union(St.Louis) %>% union(St.Paul) %>% union(Washington) %>% 
+  union(Chandler) %>% union(Columbus) %>% union(Gilbert) %>% 
+  union(Glendale) %>% union(Irvine) %>% union(Mesa) %>% 
+  union(Phoenix) %>% union(SanDiego) %>% union(Scottsdale)
 
 write_csv(master_39cities, path="master_39cities.csv")
 ```
@@ -1351,12 +1363,14 @@ Wrangling of `num_posting` data:
 num_posting <- read_csv("num_posting_US.csv") 
 #dataset that contains the number of job postings for each job title in each of the 53 cities
 
-num_posting <- num_posting %>% separate(col=`City, State`, into=c("City", "State"), sep=",") 
+num_posting <- num_posting %>% 
+  separate(col=`City, State`, into=c("City", "State"), sep=",") 
 
 names(num_posting) <- c("City", "State", "DAnalyst", "DScientist", "DArchitect", "DEngineer")
 num_posting <- replace_na(num_posting, list(DEngineer=0)) #Since the NAs for DEngineer are from cities that didn't have enough job postings (less than 10). For ease of analysis, I will consider them to be equal to zero. 
 
-num_posting_long <- num_posting %>% gather(job_title, num_posting, DAnalyst:DEngineer) #tidy data
+num_posting_long <- num_posting %>% 
+  gather(job_title, num_posting, DAnalyst:DEngineer) #tidy data
 ```
 
 ####Plot of number of job postings for each job title in 53 cities:
@@ -1397,6 +1411,15 @@ num_posting_long %>%
 
 In San Francisco, Newark, New York, Jersey City, Fremont, Oakland and Washington, there were a total of over 1000 job ads for Data Analysts, Data Scientists, Data Architects & Data Engineers combined together. Boston & Seattle had over 500 whereas San Jose had over 800. 
 
+```{r}
+rank <- num_posting_long %>% 
+  group_by(City) %>%
+  summarize(total_num_posting = sum(num_posting)) %>% 
+  tbl_df() %>% 
+  arrange(desc(total_num_posting)) 
+```
+
+
 ###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in Canada (nationwide)
 
 Creating a master dataset for Canada:
@@ -1418,7 +1441,8 @@ canada <- full_join(j1, j2, by="Term")
 
 canada <- replace_na(canada, replace=list(DAnalyst=0, DScientist=0, DArchitect=0, DEngineer=0)) 
 
-canada_long <- canada %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidy
+canada_long <- canada %>% 
+  gather(job_title, percentage, DAnalyst: DEngineer) #tidy
 ```
 
 
@@ -1443,25 +1467,33 @@ canada %>%
 For data analysts, 43.2% of job ads asked for SQL, 41.18% for Excel, 16.1% for R, 16.1% for Tableau, 12.3% for Python and 10.5% for SAS. 
 
 ```{r}
-canada %>% select(Term, DAnalyst) %>% arrange(desc(DAnalyst))
+canada %>% 
+  select(Term, DAnalyst) %>% 
+  arrange(desc(DAnalyst))
 ```
 
 For data scientists, 34.4% of job ads asked for R, 34.4% for Python, 30.5% for SQL, 23.4% for Java, 19.5% for Tableau, 18.8% for Hadoop and 11.7% for Excel. 
 
 ```{r}
-canada %>% select(Term, DScientist) %>% arrange(desc(DScientist))
+canada %>% 
+  select(Term, DScientist) %>% 
+  arrange(desc(DScientist))
 ```
 
 For data architects, 32.7% asked for SQL, 13.9% for Java, 13.9% for Hadoop, 11.9% for Tableau, 11.9% for Python and only 5.9% for R. 
 
 ```{r}
-canada %>% select(Term, DArchitect) %>% arrange(desc(DArchitect))
+canada %>% 
+  select(Term, DArchitect) %>% 
+  arrange(desc(DArchitect))
 ```
 
 For data engineers, 66.7% asked for Python, 63.0% for Hadoop, 40.7% for Spark, 37.0% for SQL & Scala, and 18.5% for Java. 
 
 ```{r}
-canada %>% select(Term, DEngineer) %>% arrange(desc(DEngineer))
+canada %>% 
+  select(Term, DEngineer) %>% 
+  arrange(desc(DEngineer))
 ```
 
 
@@ -1486,7 +1518,8 @@ usa <- full_join(j1, j2, by="Term")
 
 USA <- replace_na(usa, replace=list(DAnalyst=0, DScientist=0, DArchitect=0, DEngineer=0)) 
 
-USA_long <- usa %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidy
+USA_long <- usa %>% 
+  gather(job_title, percentage, DAnalyst: DEngineer) #tidy
 ```
 
 
@@ -1511,25 +1544,33 @@ USA %>%
 For data analysts, 56.2% of job ads asked for Excel, 27.5% for SQL, 12.5% for Tableau, 12.4% for R, 10.3% for Java and 5.5% for SAS. 
 
 ```{r}
-USA %>% select(Term, DAnalyst) %>% arrange(desc(DAnalyst))
+USA %>% 
+  select(Term, DAnalyst) %>% 
+  arrange(desc(DAnalyst))
 ```
 
 For data scientists, 37.7% of job ads asked for Python, 36.6% for R, 29.4% for SQL, 27.0% for Hadoop, 24.9% for Java, 18.7% for Matlab, 12.8% for SAS and only 4.6% for Excel. 
 
 ```{r}
-USA %>% select(Term, DScientist) %>% arrange(desc(DScientist)) 
+USA %>% 
+  select(Term, DScientist) %>% 
+  arrange(desc(DScientist)) 
 ```
 
 For data architects, 45.2% asked for SQL, 18.0% for Java, 17.2% for Java, 16.1% for Tableau, 9.1% for Python, 7.9% for R. 
 
 ```{r}
-USA %>% select(Term, DArchitect) %>% arrange(desc(DArchitect))
+USA %>% 
+  select(Term, DArchitect) %>% 
+  arrange(desc(DArchitect))
 ```
 
 For data engineers, 47.5% asked for SQL, 36.6% for Hadoop, 30.6% for Python, 28.7% for Java and 9.1% for R. 
 
 ```{r}
-USA %>% select(Term, DEngineer) %>% arrange(desc(DEngineer)) 
+USA %>% 
+  select(Term, DEngineer) %>% 
+  arrange(desc(DEngineer)) 
 ```
 
 
@@ -1541,7 +1582,8 @@ Loading the datasets with the individual cities' data:
 
 ```{r}
 master_39cities <- read_csv("master_39cities.csv")
-master_39cities_long <- master_39cities %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidydata
+master_39cities_long <- master_39cities %>% 
+  gather(job_title, percentage, DAnalyst: DEngineer) #tidydata
 ```
 
 Below, I'm calculating the average appearance of the term (name of Data Science Tools) in job postings gathered. 
@@ -1572,27 +1614,35 @@ avg_appearance_39 %>%
 For data analysts, 38.3% of job ads asked for SQL, 34.2% for Excel, 11.4% for SAS, 11.2% for R, 10.9% for Tableau and only 7.1% for Python. 
 
 ```{r}
-avg_appearance_39 %>% select(Term, avg_DAnalyst) %>% arrange(desc(avg_DAnalyst))
+avg_appearance_39 %>% 
+  select(Term, avg_DAnalyst) %>% 
+  arrange(desc(avg_DAnalyst))
 ```
 
 
 For data scientists, 47.8% of job ads asked for R, 44.1% for Python, 36.3% for Hadoop, 31.4 for SQL, 28.2% for Java, 26.6% for SAS and only 8.7% for Excel.
 
 ```{r}
-avg_appearance_39 %>% select(Term, avg_DScientist) %>% arrange(desc(avg_DScientist))
+avg_appearance_39 %>% 
+  select(Term, avg_DScientist) %>% 
+  arrange(desc(avg_DScientist))
 ```
 
 
 For data architects, 45.3% asked for SQL, 32.9% for Hadoop, 31.7% for Java, 21.8% for NoSQL, 11.5% for R and 10.6% for Python. 
 
 ```{r}
-avg_appearance_39 %>% select(Term, avg_DArchitect) %>% arrange(desc(avg_DArchitect))
+avg_appearance_39 %>% 
+  select(Term, avg_DArchitect) %>% 
+  arrange(desc(avg_DArchitect))
 ```
 
 For data engineers, 58.6% asked for Hadoop, 55.8% for Java, 44.6% for Spark, 31.2% for SQL, 27.6% for Python and only 7.2% for R. 
 
 ```{r}
-avg_appearance_39 %>% select(Term, avg_DEngineer) %>% arrange(desc(avg_DEngineer))
+avg_appearance_39 %>% 
+  select(Term, avg_DEngineer) %>% 
+  arrange(desc(avg_DEngineer))
 ```
 
 It's really interesting to see that the top 2 most-mentioned tools for data analysts are SQL & Excel whereas those for data scientists are R & Python. 
@@ -1870,8 +1920,10 @@ master_39cities%>%
 ```{r}
 load("data_scientist.rda")
 
-stackoverflow <- data_scientist %>% select(JobId, Title, Tags, LocationString, Description, CountryCode, StateCode)
-Description <- stackoverflow %>% select(Description)
+stackoverflow <- data_scientist %>% 
+  select(JobId, Title, Tags, LocationString, Description, CountryCode, StateCode)
+Description <- stackoverflow %>% 
+  select(Description)
 ```
 
 ####Creating general functions to count the terms (names of the data science tools)

@@ -1586,65 +1586,6 @@ master_39cities_long <- master_39cities %>%
   gather(job_title, percentage, DAnalyst: DEngineer) #tidydata
 ```
 
-Below, I'm calculating the average appearance of the term (name of Data Science Tools) in job postings gathered. 
-
-####Average apperance of the data science tools in job ads for Data Analysts, Data Scientists, Data Architects and Data Engineers in 39 US cities
-
-```{r, fig.width=16, fig.height=8}
-avg_appearance_39 <- master_39cities %>% 
-  group_by(Term) %>% 
-  summarize(avg_DAnalyst = mean(DAnalyst), avg_DScientist = mean(DScientist), 
-            avg_DArchitect = mean(DArchitect), avg_DEngineer = mean(DEngineer)) 
-
-avg_appearance_39 %>%
-  ggplot() +
-  geom_line(aes(Term, avg_DAnalyst, group=1, color="Data Analyst")) + 
-  geom_line(aes(Term, avg_DScientist, group=1, color="Data Scientist")) +
-  geom_line(aes(Term, avg_DArchitect, group=1, color="Data Architect")) +
-  geom_line(aes(Term, avg_DEngineer, group=1, color="Data Engineer")) +
-  xlab("") +
-  ylab("Average percentage of appearance in job ads") +
-  ggtitle("Data Science tools most common in job ads (39 U.S. cities)")+
-  theme( text=element_text(size=20), 
-        axis.text.x=element_text(angle=90, vjust=1), 
-        plot.title = element_text(size = rel(1.1)), 
-        legend.text = element_text(size = 20))
-```
-
-For data analysts, 38.3% of job ads asked for SQL, 34.2% for Excel, 11.4% for SAS, 11.2% for R, 10.9% for Tableau and only 7.1% for Python. 
-
-```{r}
-avg_appearance_39 %>% 
-  select(Term, avg_DAnalyst) %>% 
-  arrange(desc(avg_DAnalyst))
-```
-
-
-For data scientists, 47.8% of job ads asked for R, 44.1% for Python, 36.3% for Hadoop, 31.4 for SQL, 28.2% for Java, 26.6% for SAS and only 8.7% for Excel.
-
-```{r}
-avg_appearance_39 %>% 
-  select(Term, avg_DScientist) %>% 
-  arrange(desc(avg_DScientist))
-```
-
-
-For data architects, 45.3% asked for SQL, 32.9% for Hadoop, 31.7% for Java, 21.8% for NoSQL, 11.5% for R and 10.6% for Python. 
-
-```{r}
-avg_appearance_39 %>% 
-  select(Term, avg_DArchitect) %>% 
-  arrange(desc(avg_DArchitect))
-```
-
-For data engineers, 58.6% asked for Hadoop, 55.8% for Java, 44.6% for Spark, 31.2% for SQL, 27.6% for Python and only 7.2% for R. 
-
-```{r}
-avg_appearance_39 %>% 
-  select(Term, avg_DEngineer) %>% 
-  arrange(desc(avg_DEngineer))
-```
-
 Now, let's look at the data separately for each job title. 
 
 ####Data Science tools in demand for Data Analysts in 39 cities

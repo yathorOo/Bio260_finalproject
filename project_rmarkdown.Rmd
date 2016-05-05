@@ -1645,9 +1645,6 @@ avg_appearance_39 %>%
   arrange(desc(avg_DEngineer))
 ```
 
-It's really interesting to see that the top 2 most-mentioned tools for data analysts are SQL & Excel whereas those for data scientists are R & Python. 
-The percentage of job ads that asked for SQL was pretty consistent across all four job titles. Same goes for Hadoop, except in job ads for Data analysts where it was asked only 4.9% of the time. 
-
 Now, let's look at the data separately for each job title. 
 
 ####Data Science tools in demand for Data Analysts in 39 cities
@@ -2166,25 +2163,6 @@ sum_count %>%
         axis.text.x=element_text(angle=90, vjust=1), 
         plot.title = element_text(size = rel(1.1)), 
         legend.text = element_blank())
-```
-
-
-```{r, message=FALSE, fig.width=16, fig.height=8}
-g10 <- master_39cities%>% 
-  filter (City == "Austin" | City=="Columbus" | City =="SanDiego") %>%
-  ggplot() +
-  geom_line(aes(Term, DAnalyst, group=1, color="Data Analyst" )) +
-  geom_line(aes(Term, DScientist, group=1, color="Data Scientist")) +
-  geom_line(aes(Term, DArchitect, group=1, color="Data Architect")) +
-  geom_line(aes(Term, DEngineer, group=1, color="Data Engineer")) + 
-  facet_wrap(~City, nrow=2) +
-  xlab("") +
-  ylab("Percentage of appearance in job postings") +
-  ggtitle("Percentage of job ads with a data science tool")+
-  theme( text=element_text(size=20), 
-        axis.text.x=element_text(angle=90, vjust=1), 
-        plot.title = element_text(size = rel(1.1)), 
-        legend.text = element_text(size = 20))
 ```
 
 ####Word cloud of Data Science Tools mentioned in Stack Overflow Job Ads

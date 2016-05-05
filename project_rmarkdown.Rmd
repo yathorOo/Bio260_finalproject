@@ -1557,7 +1557,7 @@ USA %>%
   arrange(desc(DScientist)) 
 ```
 
-For data architects, 45.2% asked for SQL, 18.0% for Java, 17.2% for Java, 16.1% for Tableau, 9.1% for Python, 7.9% for R. 
+For data architects, 45.2% asked for SQL, 18.0% for Hadoop, 17.2% for Java, 16.1% for Tableau, 9.1% for Python, 7.9% for R. 
 
 ```{r}
 USA %>% 
@@ -1573,6 +1573,9 @@ USA %>%
   arrange(desc(DEngineer)) 
 ```
 
+
+For data analysts, Excel seems to be more popular in U.S than Canada. Over 40% of ads asked for SQL in Canada whereas only 27.5% in U.S. Less than 15% of ads asked for R and only 3% for Python in US.  
+For data scientists, Python is winning over R in U.S by 1.1%. However, still a tie in Canada. SQL needed.  
 
 ###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in 39 US cities
 
@@ -1874,8 +1877,17 @@ g9
 g10
 ```
 
+For data scientists, Python is winning over R in west coast cities such as San francisco, San Jose, Oakland & Seattle. It was a bit more 50-50 in east coast, with Jersey City & Boston job ads asking for Python more but New York and Newark asking for R more. 
 
-###Stackoverflow data: (362 job ads)
+For data analysts, almost all indeed job ads from 39 US cities asked for Excel & SQL. 
+
+More job ads ask for Python and Java for data engineers than they did for data architects. 
+
+###Stackoverflow data: (362 job ads for Data Scientists)
+
+The stackoverflow data had 362 job ads with about 60% of them from U.S. and 40% from countries around the world. 
+
+Let's see if the trends that we observed above for U.S. are similar "internationally". 
 
 ```{r}
 load("data_scientist.rda")
@@ -2098,7 +2110,7 @@ sum_count %>%
   arrange(desc(freq))
 ```
 
-####
+####Comparing data science tools in stackoverflow job ads
 ```{r, message=FALSE, fig.width=16, fig.height=8}
 sum_count %>% 
   filter(term != "Masters" & term!= "PhD" & term!="Bachelors") %>%
@@ -2114,6 +2126,8 @@ sum_count %>%
         legend.text = element_blank())
 ```
 
+For stackover flow job data, R is still winning over Python by 3%. Hadoop and SQL were equally popular for data scientists. Please note that about 44% of stack overflow job ads for data scientists mentioned machine learning! It seems that it's becoming important for data scientists to be familiar with machine learning principles and algorithms. Surprisingly, only 24% mentioned Big Data. 
+ 
 ####Word cloud of Data Science Tools mentioned in Stack Overflow Job Ads
 
 ```{r, warning=FALSE, message=FALSE}
@@ -2173,6 +2187,29 @@ words <- names(frequency)
 
 wordcloud(words, frequency, scale=c(3.5,.7), min.freq=30, random.order=FALSE, colors=brewer.pal(8, "Dark2"), max.words = 250, rot.per = 0, fixed.asp = FALSE, random.color = TRUE)
 ```
+
+##Takeaways
+
+So here are my takeaways from this analysis! 
+
+You can pick the programming languages to learn, depending on which career in the "data science universe" you want to puruse.
+
+* Data analysts: SQL, EXCEL and maybe Tableau
+* Data scientists: Python, R, SQL 
+* Data architects: SQL, Java & Hadoop
+* Data engineers: Python, Java 
+
+Although Python seems to be gaining momentum over R, they have different strengths. So you may want to pick up both for different purposes. 
+
+Companies seem to prefer open source languages such as R and Python over commercial one such as Matlab and SAS. Very good news! 
+
+It seems that machine learning will become more and more important for data scientists to be familiar with. 
+
+Currently, east coast cities have more data science jobs than west coast. So hooray for the east coasters! 
+
+However, Silicon valley have more jobs data scientists than data analysts and more for data engineers than data architects. In contrast, there are more jobs for data analysts than data scientists in east coast. East coast cities also have more jobs for data engineers than data architects but not as much as Sillicon valley. 
+
+
 
 
 

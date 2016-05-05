@@ -8,16 +8,17 @@ As someone who is thinking about going into the field of Data Science and Machin
 
 To help decide which tools to learn first, I decided to look at which data science skills are currently most in-demand by employers in major cities in Canada and U.S.
 
-Just like any sane person would do these days, I googled "web scraping indeed" to see if I can scrape its job ads to analyse them. I came across [this awesome blog](https://jessesw.com/Data-Science-Skills/) by Jesse Steinweg-Woods published in March 2015. He looked at the data science tools mentioned in the job ads from indeed for Seattle, Chicago, San Francisco, New York and Nationwide.  
+Just like any sane person would do these days, I googled "web scraping indeed" to see if I can scrape job ads to analyse them. I came across [this awesome blog](https://jessesw.com/Data-Science-Skills/) by Jesse Steinweg-Woods published in March 2015. He looked at the data science tools mentioned in the job ads aggregated by [indeed.com](http://www.indeed.com/) for Seattle, Chicago, San Francisco, New York and Nationwide.  
 
-His findings from nationwide search suggested that Python is much more in demand than R. This really intrigued me to see if the trends he found a year ago are still the same. 
+His findings from nationwide search suggested that Python is much more in demand than R. This really intrigued me to see if the trends he found a year ago have changed. 
 
 ##Goals
-My initial goals were to 
-1. To examine the Data Science skills that most employers are looking for in Canada and U.S. 
-2. To examine the ranking of Canadian and American cities based on opportunities for Data Scientists
+My initial goals were  
 
-However, as I searched for job ads for data scientists in Canada, I came to realize that there weren't enough ads for most of the cities. So I decided to focus on the national trend for Canada.
+1. To examine the Data Science skills that most employers are looking for in Canada and U.S. 
+2. To examine the ranking of Canadian and American cities based on the amount of job openings for Data Scientists
+
+However, as I searched for job ads for data scientists in Canada, I came to realize that there weren't enough ads in most of the cities. So I decided to focus on the national trend for Canada instead.
 
 As for U.S., I initially wanted to look at the top 100 largest cities. During the data collection process, some of the cities didn't have enough or no ads either. So I decided to focus on the following 53 cities, that had enough job ads for data scientists, instead.    
 
@@ -75,26 +76,25 @@ As for U.S., I initially wanted to look at the top 100 largest cities. During th
 * Tampa, FL
 * Washington, DC
 
-While gathering data from Data-Scientists job ads, I started to wonder if the skills, that the employers are looking for, would be different for other data-driven jobs, specifically for Data Analysts, Data Architects and Data Engineers. So, I decided to also start collecting data for those as well.   
+During my project meeting with David Robinson, who guided me through this project, he suggested that it would be interesting to look at the trends between data scientists and data analysts as well. So I decided to look at the skills, that the employers are looking for other data-driven jobs (specifically for Data Analysts, Data Architects and Data Engineers) as well. 
 
 ##Data collection
 
 ###Source of data
-I used [indeed.com](http://www.indeed.com/) and [indeed.ca](http://www.indeed.ca/) to gather job ads. 
+I used [indeed.com](http://www.indeed.com/) and [indeed.ca](http://www.indeed.ca/) to gather the job ads data. I also received job ads data from stackoverflow, thanks to David who works there as a data scientist! Due to the confidentiality agreement, I cannot share the stackoverflow data. However, you can find all the data that I scraped off indeed in my [github repository](https://github.com/yathorOo/YathorOo_Bio260_finalproject). 
 
-###Web scraping
-I wanted to use `rvest` to scrape data from indeed. However, after spending a few days of trying, I couldn't get the scraping function to work, since indeed is a job search aggregator and the links it provides go to different company websites that have different structure. This is my first time scraping so I probably didn't know enough R tools to make it work. 
+###Web scraping methodology
+I wanted to use `rvest` to scrape data from indeed. However, after spending a few days of trying, I couldn't get the scraping function to work, since indeed is a job search aggregator and the links it provides go to different company websites that have different structure. This is my first time scraping so I probably didn't know enough R tools to make it work. You can see a few of my failed attempts in my github repo.  
 
+So, I decided to see if I could modify [Jesse's ipython code](http://nbviewer.jupyter.org/github/jmsteinw/Notebooks/blob/master/IndeedJobs.ipynb) to get .csv files of the wordcounts (names of the Data Science Tools) from the job ads. His code was written to produce plots of the results right after scraping but not to produce .csv files. I contacted Jesse to get permission to use his code for this project and he kindly gave me permission and some tips. 
 
-So, I decided to see if I could modify [Jesse's ipython code](http://nbviewer.jupyter.org/github/jmsteinw/Notebooks/blob/master/IndeedJobs.ipynb) to get .csv files of the wordcounts of the names of the Data Science Tools from the job ads. His code was written to produce plots of the results right after scraping, not produce .csv files. 
-
-You can find the ipython notebooks [here](https://github.com/yathorOo/YathorOo_Bio260_finalproject/tree/master/scraping_indeed). 
+You can find the ipython notebooks that I used to scrape indeed [here](https://github.com/yathorOo/YathorOo_Bio260_finalproject/tree/master/scraping_indeed). 
 
 You may see in the ipython notebooks that the code was a bit repetitive. I was trying to stick to d.r.y (don't repeat yourself) principle but I have never programmed in Python, so this will be a work in progress for me to make the code neater. In the meantime, this code was enough to collect the data.   
 
 Data was collected for job ads that had exactly  "Data Analyst", "Data Scientist", "Data Architect" or "Data Engineer" in its text. Since the search was done for each job title for each of the 53 cities mentioned above, I ended up with 212 (53 times 4) .csv files. I had to do quite a bit of wrangling to comebine them together. 
 
-Out of the 53 cities, 14 of them did not have enough (more than 10) or no job postings for data engineers. Therefore, I used 39 cities to compare the skills among "Data Anlysts", "Data Scientists", "Data Architects" and "Data Engineers". I also used data from 53 cities to compare the skills among "Data Anlysts", "Data Scientists" and "Data Architects". 
+Out of the 53 cities, 14 of them had less than 10 or no job postings for data engineers. Therefore, I used 39 cities to compare the skills among "Data Anlysts", "Data Scientists", "Data Architects" and "Data Engineers". 
 
 The data collected include the percentage of job ads that contain the names of the analysis tools or programming languages, specified below, and the number of job postings per each job title in each city. 
 
@@ -130,13 +130,20 @@ The data collected include the percentage of job ads that contain the names of t
 * MongoDB
 
 ##Data Wrangling
-I had separate .csv files of word count percentages (Data Science Tools) for DAnalysts, DScientists, DArchitects and DEngineer per city. I'm combining them to analyse the data.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(readr)
 library(tidyr)
 library(dplyr)
 ```
+
+Since I have separate .csv files that contain columns `term` (name of Data Science Tools)  & `NumPostings` (Percentage of Job Ads that contain the `term`) for DAnalysts, DScientists, DArchitects and DEngineer per city. I'm combining them to analyse the data.
+
+I realized, after doing the following lengthy process, that I could have written a function to do it. 
+However, while I was initially doing it, I couldn't figure it out. 
+Since I've already written .csv files for all the cities, I'm just showing the work I did below. You can skip to "Specific Research Questions".  
+
+You can find the data used for the following wrangling [here](https://github.com/yathorOo/YathorOo_Bio260_finalproject/tree/master/53_cities_separate_files). 
 
 Joining datasets: 
 
@@ -1287,24 +1294,34 @@ Washington <- replace_na(Washington, list(DAnalyst=0, DScientist=0, DEngineer=0,
 write_csv(Washington, path = "Washington.csv") 
 ```
 
-Combinging all cities: 
+All the .csv files created from above can be found [here](https://github.com/yathorOo/YathorOo_Bio260_finalproject/tree/master/53cities_alljobs). 
+
+Combining all cities: 
 
 ```{r, eval=FALSE}
 master_39cities <- union(Anaheim, Arlington) %>% union(Atlanta) %>% union(Aurora) %>% union(Austin) %>% union(Baltimore) %>% union(Boston) %>% union(Boulder) %>% union(Chicago) %>% union(Dallas) %>% union(Denver) %>% union(Fremont) %>% union(Garland) %>% union(Irving) %>% union(Jersey) %>% union(LongBeach) %>% union(LosAngeles) %>% union(Minneapolis) %>% union(Newark) %>% union(NewYork) %>% union(Oakland) %>% union(Philadelphia) %>% union(Plano) %>% union(SanFrancisco) %>% union(SanJose) %>% union(SantaAna) %>% union(Seattle) %>% union(St.Louis) %>% union(St.Paul) %>% union(Washington) %>% union(Chandler) %>% union(Columbus) %>% union(Gilbert) %>% union(Glendale) %>% union(Irvine) %>% union(Mesa) %>% union(Phoenix) %>% union(SanDiego) %>% union(Scottsdale)
 
 write_csv(master_39cities, path="master_39cities.csv")
-
-master_53cities <- master_39cities %>% select(-DEngineer) %>% union(Charlotte) %>% union(Cincinnati) %>% union(Detroit) %>% union(Durham) %>% union(FortWorth) %>% union(Hialeah) %>% union(Houston) %>% union(Miami) %>% union(Nashville) %>% union(Pittsburgh) %>% union(Portland) %>% union(Raleigh) %>% union(St.Petersburg) %>% union(Tampa)
-
-write_csv(master_53cities, path="master_53cities.csv")
 ```
 
-After the lengthy process of wrangling and combining the data, I now have three .csv files: 
+After the lengthy process of wrangling and combining the data, I now have three [.csv files](https://github.com/yathorOo/YathorOo_Bio260_finalproject): 
 
-* `master_39cities` which include percentage of word frequency for all 4 job titles (Data Analysts, Data Scientists, Data Architects, Data Engineers) and
-* `master_53cities` which include percentage of word frequency for 3 job titles (Data Analysts, Data Scientists, Data Architects) 
-* `num_posting_US` which include the number for job postings for each job title in each of the 53 cities
-
+* `master_39cities` 
+    + Column `Term` = Name of data science tools
+    + Column `DAnalyst`= % of job ads for data analysts that contained the `Term`
+    + Column `DScientist` = % of job ads for data scientists that contained the `Term`
+    + Column `DArchitect` = % of job ads for data scientists that contained the `Term`
+    + Column `DEngineer` = % of job ads for data scientists that contained the `Term`
+    + Column `City` = U.S. Cities
+    + Column `State`= U.S. States
+* `master_53cities`
+    + Same as `master_53cities` 
+* `num_posting_US` 
+    + Column `City, State`
+    + Column `DAst_num` = Number of job ads for Data Analysts in each of the 53 cities
+    + Column `DS_num`   = Number of job ads for Data Scientists in each of the 53 cities
+    + Column `DAr_num`  = Number of job ads for Data Architects in each of the 53 cities
+    + Column `DE_num`   = Number of job ads for Data Engineers in each of the 53 cities
 
 ##Specific Research questions
 
@@ -1554,9 +1571,7 @@ The percentage of job ads that asked for SQL was pretty consistent across all fo
 Loading the datasets with the individual cities' data: 
 ```{r}
 master_39cities <- read_csv("master_39cities.csv")
-master_53cities <- read_csv("master_53cities.csv")
 master_39cities_long <- master_39cities %>% gather(job_title, percentage, DAnalyst: DEngineer) #tidy
-master_53cities_long <- master_53cities %>% gather(job_title, percentage, DAnalyst: DArchitect) #tidy
 ```
 
 Below, I'm calculating the average appearance of the term (name of Data Science Tools) in job postings gathered. 
@@ -1614,84 +1629,6 @@ It's really interesting to see that the top 2 most-mentioned tools for data anal
 The percentage of job ads that asked for SQL was pretty consistent across all four job titles. Same goes for Hadoop, except in job ads for Data analysts where it was asked only 4.9% of the time. 
 
 
-####Average apperance of the terms for Data Analysts, Data Scientists & Data Architects in 53 US cities
-
-```{r, fig.width=16, fig.height=8}
-#I"m also checking if the trends are any different when looked at 53 cities. Since the dataset does not have the numbers for data engineers, I'll only be looking at data analysts, data scientists & data architects.  
-avg_appearance_53 <- master_53cities %>% group_by(Term) %>% summarize(avg_DAnalyst = mean(DAnalyst), avg_DScientist = mean(DScientist), avg_DArchitect = mean(DArchitect)) 
-
-avg_appearance_53 %>% 
-  ggplot() +
-  geom_line(aes(Term, avg_DAnalyst, group=1, color="Data Analyst")) + 
-  geom_line(aes(Term, avg_DScientist, group=1, color="Data Scientist")) +
-  geom_line(aes(Term, avg_DArchitect, group=1, color="Data Architect")) +
-  xlab("") +
-  ylab("Average percentage of appearance in job ads") +
-  ggtitle("Data Science tools most common in job ads (53 U.S. cities)")+
-  theme( text=element_text(size=20), 
-        axis.text.x=element_text(angle=90, vjust=1), 
-        plot.title = element_text(size = rel(1.1)), 
-        legend.text = element_text(size = 20))
-```
-
-You can observe similar trends for the 53 cities as well. 
-
-```{r}
-avg_appearance_53 %>% select(Term, avg_DAnalyst) %>% arrange(desc(avg_DAnalyst))
-```
-
-```{r}
-avg_appearance_53 %>% select(Term, avg_DScientist) %>% arrange(desc(avg_DScientist))
-```
-
-```{r}
-avg_appearance_53 %>% select(Term, avg_DArchitect) %>% arrange(desc(avg_DArchitect))
-```
-
-####Data Science tools in demand for Data Analysts in 53 cities
-
-```{r, fig.width=16, fig.height=8, message=FALSE}
-master_53cities %>% 
-  ggplot(aes(Term, DAnalyst)) + 
-  geom_boxplot(color="red") +
-  xlab("") +
-  ylab("Percentage of appearance in job ads") +
-  ggtitle("Data Science Tools in demand for Data Analysts")+
-  theme( text=element_text(size=20), 
-        axis.text.x=element_text(angle=90, vjust=1), 
-        plot.title = element_text(size = rel(1.1)), 
-        legend.text = element_text(size = 20))
-```
-
-####Data Science Tools in demand for Data Scientists in 53 cities
-
-```{r, fig.width=16, fig.height=8}
-master_53cities %>% 
-  ggplot(aes(Term, DScientist)) + 
-  geom_boxplot(color="purple") +
-  xlab("") +
-  ylab("Percentage of appearance in job ads") +
-  ggtitle("Data Science Tools in demand for Data Scientists")+
-  theme( text=element_text(size=20), 
-        axis.text.x=element_text(angle=90, vjust=1), 
-        plot.title = element_text(size = rel(1.1)), 
-        legend.text = element_text(size = 20))
-```
-
-####Data Science Tools in demand for Data Architects in 53 cities
-
-```{r, fig.width=16, fig.height=8}
-master_53cities %>% 
-  ggplot(aes(Term, DArchitect)) + 
-  geom_boxplot(color="green") +
-  xlab("") +
-  ylab("Percentage of appearance in job ads") +
-  ggtitle("Data Science Tools in demand for Data Architects")+
-  theme( text=element_text(size=20), 
-        axis.text.x=element_text(angle=90, vjust=1), 
-        plot.title = element_text(size = rel(1.1)), 
-        legend.text = element_text(size = 20))
-```
 
 ###Data Science Tools in demand for Data Engineers in 39 cities (Less cities had job ads for data engineers)
 

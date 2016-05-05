@@ -2199,7 +2199,7 @@ You can pick the programming languages to learn, depending on which career in th
 * Data architects: SQL, Java & Hadoop
 * Data engineers: Python, Java 
 
-Although Python seems to be gaining momentum over R, they have different strengths. So you may want to pick up both for different purposes. 
+Although Python seems to be gaining momentum over R, they have different strengths, with R being a language developed for statisticians (easier to apply statistical concepts without much experience in programming) vs. Python being a multi-purpose language. So you may want to pick up both for different purposes. 
 
 Companies seem to prefer open source languages such as R and Python over commercial one such as Matlab and SAS. Very good news! 
 

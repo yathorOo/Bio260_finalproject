@@ -1396,7 +1396,7 @@ There were similar number of job ads for data engineers and data architects, exc
 
 ####Plot of total number of job postings (for Data Analysts, Data Scientists, Data Architects & Data Engineers) in 53 cities: 
 
-```{r, fig.width=16, fig.height=8}
+```{r, fig.width=14, fig.height=8}
 num_posting_long %>% 
   group_by(City) %>%
   summarize(total_num_posting = sum(num_posting)) %>% 

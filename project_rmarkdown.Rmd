@@ -1424,6 +1424,8 @@ num_posting_long %>%
 
 Creating a master dataset for Canada:
 
+You can find the datasets for Canada [here](https://github.com/yathorOo/YathorOo_Bio260_finalproject). 
+
 ```{r}
 canada1 <- read_csv("canada1.csv")
 canada2 <- read_csv("canada2.csv")
@@ -1500,6 +1502,8 @@ canada %>%
 ###Comparing demand of data science tools between Data analysts, Data scientists, Data architects & Data engineers in USA (nationwide)
 
 Creating a master dataset for USA nationwide count:
+
+You can find the datasets for US [here](https://github.com/yathorOo/YathorOo_Bio260_finalproject)
 
 ```{r}
 usa1 <- read_csv("national1.csv")

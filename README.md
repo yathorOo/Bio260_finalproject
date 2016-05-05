@@ -1,4 +1,6 @@
 # Bio260_finalproject
+
+**Notes about the datasets**
 * `master_39cities` 
     + Column `Term` = Name of data science tools
     + Column `DAnalyst`= % of job ads for data analysts that contained the `Term`

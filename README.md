@@ -47,7 +47,7 @@ His findings from nationwide search suggested that Python is much more in demand
 * `53cities_alljobs` folder: Job ad data collected from scraping indeed.com for 53 American cities. 
     + The job titles searched are "Data Analyst", "Data Scientist", "Data Architect" and "Data Engineer".
 * `scraping_indeed`: Code used for web scraping indeed. 
-    + These are modifed codes of Jesse Steinweg-Woods. YOou can find his original code [here](http://nbviewer.jupyter.org/github/jmsteinw/Notebooks/blob/master/IndeedJobs.ipynb) 
+    + These are modifed codes of Jesse Steinweg-Woods. You can find his original code [here](http://nbviewer.jupyter.org/github/jmsteinw/Notebooks/blob/master/IndeedJobs.ipynb) 
     + You may see in the ipython notebooks that the code was a bit repetitive. I was trying to stick to d.r.y (don't repeat yourself) principle but I have never programmed in Python, so this will be a work in progress for me to make the code neater. In the meantime, this code was enough to collect the data. 
 
 
